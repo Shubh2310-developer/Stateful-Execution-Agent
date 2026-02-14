@@ -1,0 +1,4 @@
+test_db_name: stateful_agent_test
+mock_llm: true
+log_level: DEBUG
+timeout_seconds: 10

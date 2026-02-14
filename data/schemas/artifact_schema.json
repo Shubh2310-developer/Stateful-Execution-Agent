@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Artifact",
+  "type": "object",
+  "properties": {
+    "artifact_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "step_id": { "type": "string" },
+    "type": { "type": "string" },
+    "format": { "type": "string" },
+    "storage_uri": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "required": ["artifact_id", "task_id", "step_id", "type", "format", "storage_uri"]
+}

@@ -1,0 +1,5 @@
+app:
+  env: "development"
+
+llm:
+  temperature: 0.7

@@ -1,0 +1,14 @@
+ORIGINAL GOAL: {{ goal }}
+
+CURRENT PLAN STEPS:
+{% for step in steps %}
+- [{{ step.status }}] {{ step.description }}
+{% endfor %}
+
+FAILURE REASON / FEEDBACK:
+{{ feedback }}
+
+AVAILABLE ARTIFACTS:
+{{ available_artifacts | tojson(indent=2) }}
+
+Update the remaining steps of the plan to account for this information. Ensure the path to the original goal remains clear. Return ONLY the updated JSON plan.

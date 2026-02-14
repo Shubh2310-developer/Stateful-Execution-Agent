@@ -1,0 +1,30 @@
+replicaCount: 2
+
+image:
+  repository: stateful-agent
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+env:
+  ENV: "production"
+  MONGODB_DB_NAME: "stateful_agent_state"
+  POSTGRES_DB: "stateful_agent_data"
+
+mongodb:
+  enabled: true
+postgresql:
+  enabled: true
+redis:
+  enabled: true

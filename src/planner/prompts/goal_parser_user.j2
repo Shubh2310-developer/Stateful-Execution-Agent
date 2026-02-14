@@ -1,0 +1,8 @@
+USER REQUEST: {{ raw_goal }}
+
+{% if context %}
+CONTEXT:
+{{ context | tojson(indent=2) }}
+{% endif %}
+
+Please transform this request into a structured goal definition. Return ONLY the JSON object.

@@ -1,0 +1,10 @@
+groups:
+- name: PerformanceAlerts
+  rules:
+  - alert: SlowStepExecution
+    expr: agent_step_execution_seconds_sum / agent_step_execution_seconds_count > 300
+    for: 10m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Average step execution is taking longer than 5 minutes"

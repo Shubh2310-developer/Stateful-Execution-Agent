@@ -1,0 +1,10 @@
+{
+  "title": "LLM Usage",
+  "panels": [
+    {
+      "title": "Token Consumption",
+      "type": "graph",
+      "targets": [{ "expr": "sum(rate(agent_llm_token_usage_total[5m])) by (model, type)" }]
+    }
+  ]
+}

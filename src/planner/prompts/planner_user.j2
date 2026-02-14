@@ -1,0 +1,27 @@
+GOAL: {{ goal }}
+
+AVAILABLE TOOLS:
+{% for tool in tool_list %}
+- {{ tool }}
+{% endfor %}
+
+{% if user_preferences %}
+USER PREFERENCES:
+{{ user_preferences | tojson(indent=2) }}
+{% endif %}
+
+{% if constraints %}
+CONSTRAINTS:
+{{ constraints | tojson(indent=2) }}
+{% endif %}
+
+{% if few_shot_examples %}
+EXAMPLES:
+{% for example in few_shot_examples %}
+Example {{ loop.index }}:
+Input: {{ example.goal }}
+Output: {{ example.plan | tojson(indent=2) }}
+{% endfor %}
+{% endif %}
+
+Generate a detailed execution plan following the standard schema. Return ONLY the JSON object.

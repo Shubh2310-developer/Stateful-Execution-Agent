@@ -1,0 +1,284 @@
+# Stateful Execution Agent - Requirements
+# Python 3.10+ compatible
+# CUDA 13.0 compatible for NVIDIA GeForce RTX 4050
+
+# ============================================================================
+# CORE DEPENDENCIES
+# ============================================================================
+
+# Web Framework
+fastapi==0.109.2
+uvicorn[standard]==0.27.1
+pydantic==2.6.1
+pydantic-settings==2.1.0
+
+# LLM Provider - Groq
+groq==0.4.2
+
+# Database Drivers
+pymongo==4.6.1                    # MongoDB for state management
+motor==3.3.2                      # Async MongoDB driver
+psycopg2-binary==2.9.9           # PostgreSQL driver
+asyncpg==0.29.0                   # Async PostgreSQL driver
+
+# Object Storage
+boto3==1.34.34                    # AWS S3 compatible storage
+minio==7.2.3                      # MinIO client
+
+# Caching
+redis==5.0.1                      # Redis client
+hiredis==2.3.2                    # Redis performance boost
+
+# Message Queue
+kafka-python==2.0.2               # Apache Kafka for trace logging
+aiokafka==0.10.0                  # Async Kafka client
+
+# ============================================================================
+# AI/ML LIBRARIES (CUDA 13.0 Compatible)
+# ============================================================================
+
+# PyTorch with CUDA 13.0 support
+--extra-index-url https://download.pytorch.org/whl/cu118
+torch==2.1.2+cu118
+torchvision==0.16.2+cu118
+torchaudio==2.1.2+cu118
+
+# Vector embeddings and semantic search
+sentence-transformers==2.3.1
+faiss-gpu==1.7.2                  # GPU-accelerated similarity search
+transformers==4.37.2
+tokenizers==0.15.1
+
+# ============================================================================
+# DATA PROCESSING
+# ============================================================================
+
+# Scientific computing
+numpy==1.26.3
+pandas==2.2.0
+scipy==1.12.0
+
+# Data validation
+jsonschema==4.21.1
+cerberus==1.3.5
+
+# Serialization
+orjson==3.9.13                    # Fast JSON
+msgpack==1.0.7
+# pickle5==0.0.12 (Included in Python 3.8+)
+
+# ============================================================================
+# DOCUMENT PROCESSING
+# ============================================================================
+
+# PDF processing
+pypdf==4.0.1
+reportlab==4.0.9
+pdfplumber==0.10.4
+
+# Document generation
+python-docx==1.1.0
+python-pptx==0.6.23
+openpyxl==3.1.2
+xlsxwriter==3.1.9
+
+# Markdown processing
+markdown==3.5.2
+python-markdown-math==0.8
+
+# ============================================================================
+# WEB SCRAPING & SEARCH
+# ============================================================================
+
+# Web requests
+httpx==0.26.0
+aiohttp==3.9.3
+requests==2.31.0
+
+# Web scraping
+beautifulsoup4==4.12.3
+lxml==5.1.0
+selenium==4.17.2
+
+# Search
+elasticsearch==8.12.0
+
+# ============================================================================
+# VISUALIZATION & CHARTS
+# ============================================================================
+
+# Plotting libraries
+matplotlib==3.8.2
+seaborn==0.13.2
+plotly==5.18.0
+
+# Image processing
+pillow==10.2.0
+opencv-python==4.9.0.80
+
+# ============================================================================
+# AUTHENTICATION & SECURITY
+# ============================================================================
+
+# JWT and authentication
+pyjwt[crypto]==2.8.0
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Encryption
+cryptography==42.0.2
+
+# ============================================================================
+# MONITORING & LOGGING
+# ============================================================================
+
+# Prometheus metrics
+prometheus-client==0.19.0
+prometheus-fastapi-instrumentator==6.1.0
+
+# Logging
+loguru==0.7.2
+python-json-logger==2.0.7
+
+# Tracing
+opentelemetry-api==1.22.0
+opentelemetry-sdk==1.22.0
+opentelemetry-instrumentation-fastapi==0.43b0
+
+# ============================================================================
+# TASK QUEUE & ASYNC
+# ============================================================================
+
+# Async utilities
+# asyncio==3.4.3 (Included in Python 3.4+)
+aiofiles==23.2.1
+anyio==4.2.0
+
+# Background tasks
+celery==5.3.6
+flower==2.0.1
+
+# ============================================================================
+# CONFIGURATION & ENVIRONMENT
+# ============================================================================
+
+# Environment variables
+python-dotenv==1.0.1
+
+# Configuration management
+pyyaml==6.0.1
+toml==0.10.2
+configparser==6.0.0
+
+# ============================================================================
+# TESTING
+# ============================================================================
+
+# Testing frameworks
+pytest>=7.0.0,<8.0.0
+pytest-asyncio==0.23.4
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+pytest-timeout==2.2.0
+
+# Load testing
+locust==2.22.0
+
+# Code quality
+black==24.1.1
+flake8==7.0.0
+pylint==3.0.3
+mypy==1.8.0
+isort==5.13.2
+
+# ============================================================================
+# UTILITIES
+# ============================================================================
+
+# Date/time utilities
+python-dateutil==2.8.2
+pytz==2024.1
+arrow==1.3.0
+
+# UUID generation
+shortuuid==1.0.11
+
+# Progress bars
+tqdm==4.66.1
+
+# Validation
+validators==0.22.0
+
+# Rate limiting
+slowapi==0.1.9
+
+# Retry logic
+tenacity==8.2.3
+
+# File handling
+# pathlib==1.0.1 (Included in Python 3.4+)
+watchdog==4.0.0
+
+# CLI tools
+click==8.1.7
+rich==13.7.0
+
+# Email
+emails==0.6
+
+# ============================================================================
+# DEVELOPMENT TOOLS
+# ============================================================================
+
+# Debugging
+ipython==8.20.0
+ipdb==0.13.13
+
+# Documentation
+mkdocs==1.5.3
+mkdocs-material==9.5.6
+
+# API documentation
+openapi-schema-pydantic==1.2.4
+
+# ============================================================================
+# DEPLOYMENT
+# ============================================================================
+
+# WSGI/ASGI servers
+gunicorn==21.2.0
+
+# Health checks
+py-healthcheck>=1.10.1
+
+# ============================================================================
+# OPTIONAL: GPU MONITORING
+# ============================================================================
+
+# NVIDIA GPU monitoring
+nvidia-ml-py==12.535.133
+gpustat==1.1.1
+
+# ============================================================================
+# NOTES
+# ============================================================================
+# 
+# Installation instructions:
+# 1. Create virtual environment: python3.10 -m venv venv
+# 2. Activate: source venv/bin/activate
+# 3. Upgrade pip: pip install --upgrade pip
+# 4. Install requirements: pip install -r requirements.txt
+#
+# For CUDA 13.0 support:
+# - Ensure NVIDIA driver 580.119.02 or newer
+# - CUDA Toolkit 13.0 installed
+# - cuDNN compatible with CUDA 13.0
+#
+# GPU Memory Considerations (RTX 4050 - 6GB VRAM):
+# - Monitor GPU memory with: nvidia-smi
+# - Adjust batch sizes for embedding models
+# - Consider using smaller transformer models
+# - Enable gradient checkpointing for memory efficiency
+#
+# ============================================================================

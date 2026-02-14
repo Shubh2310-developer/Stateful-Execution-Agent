@@ -1,0 +1,9 @@
+app:
+  env: "production"
+
+llm:
+  temperature: 0.0
+
+database:
+  mongodb_uri: "${AGENT_MONGODB_URI}"
+  postgres_uri: "${AGENT_POSTGRES_URI}"

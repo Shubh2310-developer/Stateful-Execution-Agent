@@ -1,0 +1,13 @@
+{
+  "title": "Task Metrics",
+  "panels": [
+    {
+      "title": "Task Throughput",
+      "type": "graph",
+      "targets": [
+        { "expr": "rate(agent_task_creation_total[5m])", "legendFormat": "Created" },
+        { "expr": "rate(agent_task_completion_total[5m])", "legendFormat": "Completed" }
+      ]
+    }
+  ]
+}

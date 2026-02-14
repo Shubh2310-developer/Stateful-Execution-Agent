@@ -1,0 +1,19 @@
+# Stateful Execution Agent
+> Autonomous goal-driven AI knowledge worker with persistent state, memory, and transparent decision-making.
+
+## Core Files
+- [src/api/app.py]: Main FastAPI entry point
+- [src/orchestration/session_manager.py]: Task lifecycle and session management
+- [src/planner/planner.py]: Goal decomposition and step generation logic
+- [src/executor/executor.py]: Step execution engine
+- [src/memory/memory_manager.py]: Short-term and long-term memory coordination
+- [src/state/state_manager.py]: Persistence and state versioning
+- [src/trace/trace_logger.py]: Decision logging and event streaming
+- [docs/architecture/ROADMAP.md]: System architecture and design specification
+
+## Key Concepts
+- **Goal Decomposition**: Transforming high-level user intent into atomic, executable steps with success criteria.
+- **Two-Layer Memory**: Task-scoped short-term memory combined with user-scoped long-term preference and pattern learning.
+- **Decision Trace**: Every agent action and reasoning step is logged in an append-only stream for auditability.
+- **Stateful Resumption**: Tasks can be paused and resumed across sessions with full context preservation.
+- **Tool Orchestration**: Modular system for selecting and invoking specialized capabilities (Search, Data, Docs).

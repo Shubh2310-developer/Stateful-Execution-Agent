@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-config
+data:
+  APP_NAME: "stateful-execution-agent"
+  ENV: "production"
+  MONGODB_DB_NAME: "stateful_agent_state"
+  POSTGRES_DB: "stateful_agent_data"
+  REDIS_HOST: "redis-service"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka-service:9092"

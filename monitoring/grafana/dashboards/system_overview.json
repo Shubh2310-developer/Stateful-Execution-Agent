@@ -1,0 +1,10 @@
+{
+  "title": "System Overview",
+  "panels": [
+    {
+      "title": "Active Sessions",
+      "type": "gauge",
+      "targets": [{ "expr": "agent_active_sessions" }]
+    }
+  ]
+}

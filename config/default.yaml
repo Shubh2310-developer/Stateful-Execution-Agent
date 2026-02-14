@@ -1,0 +1,23 @@
+app:
+  name: "Stateful Execution Agent"
+  version: "0.1.0"
+  env: "development"
+
+llm:
+  provider: "groq"
+  model: "llama-3.3-70b-versatile"
+  temperature: 0.0
+  max_tokens: 4096
+
+database:
+  mongodb_uri: "mongodb://localhost:27017"
+  mongodb_db: "agent_state"
+  postgres_uri: "postgresql://postgres:postgres@localhost:5432/agent_db"
+
+storage:
+  local_root: "./data/storage"
+
+security:
+  api_key_header: "X-API-KEY"
+  jwt_secret: "super-secret-key"
+  jwt_algorithm: "HS256"

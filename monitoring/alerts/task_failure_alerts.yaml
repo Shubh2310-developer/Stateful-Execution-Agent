@@ -1,0 +1,19 @@
+groups:
+- name: AgentAlerts
+  rules:
+  - alert: HighTaskFailureRate
+    expr: rate(agent_task_completion_total{status="failed"}[5m]) / rate(agent_task_creation_total[5m]) > 0.1
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "High task failure rate detected"
+      description: "More than 10% of tasks have failed in the last 5 minutes."
+
+  - alert: LatencySpike
+    expr: histogram_quantile(0.95, sum(rate(agent_step_execution_seconds_bucket[5m])) by (le)) > 120
+    for: 2m
+    labels:
+      severity: warning
+    annotations:
+      summary: "95th percentile latency is above 2 minutes"

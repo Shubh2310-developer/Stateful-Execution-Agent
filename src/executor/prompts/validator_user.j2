@@ -1,0 +1,18 @@
+STEP DESCRIPTION:
+{{ step_description }}
+
+SUCCESS CRITERIA:
+{% for criterion in success_criteria %}
+- {{ criterion }}
+{% endfor %}
+
+OUTPUT TO VALIDATE:
+{{ step_output | tojson(indent=2) }}
+
+Return your evaluation as a JSON object:
+{
+  "passed": bool,
+  "reasoning": str,
+  "quality_score": float,
+  "issues": list[str]
+}
