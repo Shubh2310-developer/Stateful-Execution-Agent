@@ -4,6 +4,7 @@ from src.core.types import UserMemory
 SAMPLE_USER_MEMORY = UserMemory(
     user_id="usr_test_123",
     profile={
+        "user_id": "usr_test_123",
         "role": "QA Engineer",
         "company": "TestCorp",
         "industry": "Software"

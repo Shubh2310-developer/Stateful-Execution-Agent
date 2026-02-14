@@ -1,30 +1,31 @@
-STEP TO EXECUTE:
+### STEP EXECUTION CONTEXT
+**CURRENT STEP**:
 {{ step_definition | tojson(indent=2) }}
 
-INPUTS/ARTIFACTS AVAILABLE:
+**AVAILABLE ARTIFACTS (Inputs from previous steps)**:
 {{ available_artifacts | tojson(indent=2) }}
 
-TOOLS AVAILABLE:
+**TOOLS AVAILABLE IN REGISTRY**:
 {% for tool in tool_list %}
 - {{ tool }}
 {% endfor %}
 
 {% if user_preferences %}
-USER PREFERENCES:
+**USER PREFERENCES**:
 {{ user_preferences | tojson(indent=2) }}
 {% endif %}
 
-{% if few_shot_examples %}
-EXAMPLES:
-{% for example in few_shot_examples %}
-Example {{ loop.index }}:
-Input: {{ example.input | tojson(indent=2) }}
-Output: {{ example.output | tojson(indent=2) }}
-{% endfor %}
+{% if context %}
+**TASK CONTEXT & RECENT HISTORY**:
+{{ context | tojson(indent=2) }}
 {% endif %}
 
-Perform the necessary actions using the available tools and return the result as a JSON object containing:
-1. 'action': The name of the tool to invoke.
-2. 'parameters': The arguments for the tool.
-3. 'reasoning': Your explanation for this specific choice.
-4. 'confidence': Your confidence level (0.0 to 1.0).
+---
+
+### INSTRUCTIONS
+1. Perform the tactical analysis required by your Operational Protocol.
+2. Formulate the optimal tool call based on the available artifacts and step description.
+3. Ensure your `reasoning` explicitly mentions why you chose specific parameter values.
+4. If the step requires data from a specific artifact, verify the artifact ID exists in the context above.
+
+Generate the execution JSON now. Return ONLY the JSON object.

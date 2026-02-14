@@ -8,6 +8,6 @@ async def health_check():
     """Basic health check endpoint."""
     return {
         "status": "healthy",
-        "app": settings.APP_NAME,
-        "environment": settings.ENV
+        "app": settings.app.name,
+        "environment": settings.app.env
     }

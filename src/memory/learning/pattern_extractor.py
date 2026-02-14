@@ -14,7 +14,7 @@ class PatternExtractor:
             tool_sequence = [d.choice_made for d in state.decisions]
             patterns.append({
                 "type": "successful_strategy",
-                "goal_type": state.goal.get("request"),
+                "goal_type": state.goal.request,
                 "tools": tool_sequence,
                 "confidence_avg": sum(d.confidence for d in state.decisions) / len(state.decisions) if state.decisions else 0
             })

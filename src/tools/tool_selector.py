@@ -1,6 +1,6 @@
 from typing import List, Optional
 from src.tools.tool_registry import tool_registry
-from src.tools.base_tool import BaseTool
+from src.tools.base import BaseTool
 from src.utils.logger import logger
 
 class ToolSelector:

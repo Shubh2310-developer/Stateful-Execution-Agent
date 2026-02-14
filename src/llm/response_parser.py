@@ -37,9 +37,11 @@ class ResponseParser:
             # 1. Attempt to find JSON within markdown blocks first
             json_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", response_text, re.DOTALL)
             if json_match:
-                cleaned_text = json_match.group(1)
+                # Use greedy matching for the content inside markdown to handle nested braces
+                markdown_content = re.search(r"```(?:json)?\s*(\{.*\})\s*```", response_text, re.DOTALL)
+                cleaned_text = markdown_content.group(1) if markdown_content else json_match.group(1)
             else:
-                # 2. If no markdown blocks, try to find the first '{' and last '}'
+                # 2. If no markdown blocks, find the outermost braces
                 start_index = response_text.find('{')
                 end_index = response_text.rfind('}')
 

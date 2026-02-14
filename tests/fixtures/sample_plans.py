@@ -1,28 +1,28 @@
-from src.core.types import Plan, Step
+from src.core.types import Plan, Step, TaskStatus
 
 SAMPLE_STEP_1 = Step(
     step_id="step_001",
-    order=1,
     action="web_search",
     description="Search for Python hello world examples",
-    success_criteria="Found at least one example",
-    tools_needed=["web_search"]
+    tools=["web_search"],
+    dependencies=[],
+    status=TaskStatus.PENDING,
+    input_data={"query": "python hello world"},
+    output_data={}
 )
 
 SAMPLE_STEP_2 = Step(
     step_id="step_002",
-    order=2,
     action="document_generator",
     description="Write the code to a file",
-    success_criteria="File 'hello.py' created with correct content",
+    tools=["document_generator"],
     dependencies=["step_001"],
-    tools_needed=["document_generator"]
+    status=TaskStatus.PENDING,
+    input_data={"content": "print('hello world')"},
+    output_data={}
 )
 
 SAMPLE_PLAN = Plan(
     task_id="task_test_001",
-    goal_summary="Create a hello world python script",
-    steps=[SAMPLE_STEP_1, SAMPLE_STEP_2],
-    total_estimated_duration_minutes=5,
-    risk_assessment="low"
+    steps=[SAMPLE_STEP_1, SAMPLE_STEP_2]
 )

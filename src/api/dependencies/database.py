@@ -5,7 +5,7 @@ from src.utils.logger import logger
 
 def get_mongodb_client():
     """Dependency for obtaining a MongoDB client."""
-    client = AsyncIOMotorClient(settings.MONGODB_URL)
+    client = AsyncIOMotorClient(settings.database.mongodb_uri)
     try:
         yield client
     finally:
@@ -13,8 +13,8 @@ def get_mongodb_client():
 
 def get_mongodb_db():
     """Dependency for obtaining the MongoDB database."""
-    client = AsyncIOMotorClient(settings.MONGODB_URL)
-    db = client[settings.MONGODB_DB_NAME]
+    client = AsyncIOMotorClient(settings.database.mongodb_uri)
+    db = client[settings.database.mongodb_db]
     try:
         yield db
     finally:
@@ -22,13 +22,7 @@ def get_mongodb_db():
 
 def get_postgresql_conn():
     """Dependency for obtaining a PostgreSQL connection."""
-    conn = psycopg2.connect(
-        host=settings.POSTGRES_SERVER,
-        user=settings.POSTGRES_USER,
-        password=settings.POSTGRES_PASSWORD,
-        port=settings.POSTGRES_PORT,
-        dbname=settings.POSTGRES_DB
-    )
+    conn = psycopg2.connect(settings.database.postgres_uri)
     try:
         yield conn
     finally:

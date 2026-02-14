@@ -7,8 +7,8 @@ async def archive_tasks():
     """Moves completed tasks older than 90 days to an archive collection."""
     logger.info("Starting task archiving process...")
 
-    client = AsyncIOMotorClient(settings.MONGODB_URL)
-    db = client[settings.MONGODB_DB_NAME]
+    client = AsyncIOMotorClient(settings.database.mongodb_uri)
+    db = client[settings.database.mongodb_db]
 
     # In a real impl, we would use a date filter
     # For now, just count completed tasks

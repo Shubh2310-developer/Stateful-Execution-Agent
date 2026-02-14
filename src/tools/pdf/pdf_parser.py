@@ -1,20 +1,26 @@
 from typing import Any, Dict, List
-from src.tools.base_tool import BaseTool, ToolMetadata
+from src.tools.base import BaseTool, ToolMetadata
 from src.utils.logger import logger
 
 class PDFParserTool(BaseTool):
+    """Tool for extracting text and metadata from PDF files."""
+
     @property
     def metadata(self) -> ToolMetadata:
         return ToolMetadata(
             name="pdf_parser",
             description="Extract text and metadata from PDF files.",
-            input_schema={
-                "file_uri": "string"
+            parameters={
+                "type": "object",
+                "properties": {
+                    "file_uri": {"type": "string", "description": "The URI or path to the PDF file"}
+                },
+                "required": ["file_uri"]
             },
-            output_type="object"
+            returns={"type": "object", "description": "Extracted text and metadata"}
         )
 
-    async def run(self, file_uri: str) -> Dict[str, Any]:
+    async def execute(self, file_uri: str, **kwargs) -> Dict[str, Any]:
         logger.info(f"Parsing PDF at: {file_uri}")
 
         # Simulated PDF parsing

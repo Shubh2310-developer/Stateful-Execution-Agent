@@ -1,0 +1,36 @@
+### TASK EXECUTION SUMMARY
+**GOAL**: {{ goal }}
+**STATUS**: {{ status }}
+
+**PLAN EXECUTED**:
+{% for step in steps %}
+- [{{ step.status }}] {{ step.step_id }}: {{ step.description }} (Action: {{ step.action }})
+{% endfor %}
+
+**ARTIFACTS PRODUCED**:
+{% for artifact in artifacts %}
+- ID: {{ artifact.id }} | Type: {{ artifact.type }} | URI: {{ artifact.uri }}
+{% endfor %}
+
+{% if logs %}
+**EXECUTION LOGS (TRUNCATED)**:
+{% for log in logs %}
+- [{{ log.step_id }}] Action: {{ log.action }}
+  Output: {{ log.output }}
+{% endfor %}
+{% endif %}
+
+{% if feedback %}
+**USER FEEDBACK**:
+{{ feedback | tojson(indent=2) }}
+{% endif %}
+
+---
+
+### INSTRUCTIONS
+1. Evaluate the execution trace and artifacts.
+2. Extract any persistent user preferences revealed by this task or the feedback.
+3. Synthesize a reusable "Historical Pattern" that can guide the Planner for similar future goals.
+4. List specific lessons learned (e.g., "Tool X requires parameter Y for better results").
+
+Generate the JSON learning summary now.

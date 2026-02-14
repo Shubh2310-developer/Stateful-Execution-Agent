@@ -7,8 +7,10 @@ class SessionManager:
     """Manages active task sessions and their lifecycle."""
 
     def __init__(self):
-        self.state_manager = StateManager()
-        self.version_manager = VersionManager()
+        from src.state.persistence.database_adapter import DatabaseAdapter
+        db_adapter = DatabaseAdapter()
+        self.state_manager = StateManager(db_adapter=db_adapter)
+        self.version_manager = VersionManager(db_adapter=db_adapter)
         self._active_sessions: Dict[str, Any] = {}
 
     async def create_session(self, task_id: str, user_id: str, goal: Dict[str, Any]):

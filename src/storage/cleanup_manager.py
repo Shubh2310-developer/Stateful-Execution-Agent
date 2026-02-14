@@ -1,12 +1,19 @@
 import os
 import time
+from typing import Optional
 from src.utils.logger import logger
+from src.storage.artifact_store import ArtifactStore
 
 class CleanupManager:
     """Manages the lifecycle and cleanup of temporary artifacts."""
 
-    def __init__(self, base_dir: str = "data/artifacts", max_age_days: int = 30):
-        self.base_dir = base_dir
+    def __init__(self, store: Optional[ArtifactStore] = None, max_age_days: int = 30):
+        self.store = store or ArtifactStore()
+        # Access the backend's base_dir if it's LocalStorage
+        if hasattr(self.store.backend, "base_dir"):
+            self.base_dir = self.store.backend.base_dir
+        else:
+            self.base_dir = "data/artifacts"
         self.max_age_seconds = max_age_days * 24 * 60 * 60
 
     def cleanup_old_artifacts(self):

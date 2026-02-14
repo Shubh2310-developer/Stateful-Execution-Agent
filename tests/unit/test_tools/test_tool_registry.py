@@ -1,6 +1,6 @@
 import pytest
 from src.tools.tool_registry import ToolRegistry
-from src.tools.base_tool import BaseTool, ToolMetadata
+from src.tools.base import BaseTool, ToolMetadata
 
 class MockTool(BaseTool):
     @property
@@ -8,10 +8,16 @@ class MockTool(BaseTool):
         return ToolMetadata(
             name="mock_tool",
             description="A mock tool for testing",
-            input_schema={"param": "string"},
-            output_type="string"
+            parameters={
+                "type": "object",
+                "properties": {
+                    "param": {"type": "string"}
+                },
+                "required": ["param"]
+            },
+            returns={"type": "string"}
         )
-    async def run(self, param: str) -> str:
+    async def execute(self, param: str, **kwargs) -> str:
         return f"result_{param}"
 
 def test_tool_registry_operations():
@@ -26,10 +32,11 @@ def test_tool_registry_operations():
     retrieved = registry.get_tool("mock_tool")
     assert retrieved == tool
 
-    # Test metadata list
-    metadata_list = registry.get_tool_metadata_list()
-    assert len(metadata_list) == 1
-    assert metadata_list[0]["name"] == "mock_tool"
+    # Test schemas
+    schemas = registry.get_tool_schemas()
+    assert len(schemas) == 1
+    assert schemas[0]["name"] == "mock_tool"
+    assert "parameters" in schemas[0]
 
 def test_get_nonexistent_tool():
     registry = ToolRegistry()

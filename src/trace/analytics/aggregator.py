@@ -7,8 +7,8 @@ class TraceAggregator:
     """Aggregates trace data for reporting and analytics."""
 
     def __init__(self):
-        self.client = AsyncIOMotorClient(settings.MONGODB_URL)
-        self.db = self.client[settings.MONGODB_DB_NAME]
+        self.client = AsyncIOMotorClient(settings.database.mongodb_uri)
+        self.db = self.client[settings.database.mongodb_db]
         self.collection = self.db.trace
 
     async def get_task_summary(self, task_id: str) -> Dict[str, Any]:

@@ -15,7 +15,7 @@ def event_loop():
 
 @pytest.fixture(scope="session")
 def mongodb_client():
-    client = AsyncIOMotorClient(settings.MONGODB_URL)
+    client = AsyncIOMotorClient(settings.database.mongodb_uri)
     yield client
     client.close()
 

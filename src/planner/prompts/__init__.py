@@ -1,4 +1,3 @@
-from src.planner.prompts.system_prompt import PLANNER_SYSTEM_PROMPT
-from src.planner.prompts.planning_templates import PLANNING_TEMPLATE, REPLANNING_TEMPLATE
-
-__all__ = ["PLANNER_SYSTEM_PROMPT", "PLANNING_TEMPLATE", "REPLANNING_TEMPLATE"]
+# This file is intentionally minimal as prompts are now managed via Jinja2 templates
+# and the PromptBuilder class.
+__all__ = []

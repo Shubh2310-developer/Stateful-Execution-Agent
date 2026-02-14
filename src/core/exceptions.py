@@ -39,3 +39,8 @@ class ConfigError(AgentException):
 class LLMError(AgentException):
     """Raised when there is an issue with the LLM provider or response."""
     pass
+
+
+class ToolError(AgentException):
+    """Raised when a tool execution fails."""
+    pass

@@ -15,5 +15,9 @@ class GoalParser:
         response_text = await groq_client.generate_response(messages)
         parsed_goal = ResponseParser.parse_json_response(response_text)
 
+        # Log the Chain-of-Thought reasoning
+        reasoning = parsed_goal.get("reasoning", "No reasoning provided.")
+        logger.info(f"Goal Parser Reasoning: {reasoning}")
+
         logger.debug(f"Parsed goal: {parsed_goal.get('primary_objective')}")
         return parsed_goal

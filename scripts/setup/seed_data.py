@@ -4,9 +4,9 @@ from src.core.config import settings
 from datetime import datetime
 
 async def seed_data():
-    print(f"Connecting to MongoDB at {settings.MONGODB_URL}...")
-    client = AsyncIOMotorClient(settings.MONGODB_URL)
-    db = client[settings.MONGODB_DB_NAME]
+    print(f"Connecting to MongoDB at {settings.database.mongodb_uri}...")
+    client = AsyncIOMotorClient(settings.database.mongodb_uri)
+    db = client[settings.database.mongodb_db]
 
     # Seed a sample user profile/memory
     user_id = "usr_demo_123"

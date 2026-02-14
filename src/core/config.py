@@ -18,6 +18,7 @@ class AppConfig(BaseModel):
     name: str = "Stateful Execution Agent"
     version: str = "0.1.0"
     env: EnvType = EnvType.DEVELOPMENT
+    api_v1_str: str = "/api/v1"
 
 
 class LLMConfig(BaseModel):

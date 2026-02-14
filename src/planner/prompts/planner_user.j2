@@ -1,27 +1,59 @@
-GOAL: {{ goal }}
+### INPUT CONTEXT
+**PRIMARY GOAL**: {{ goal }}
 
-AVAILABLE TOOLS:
+**AVAILABLE TOOLS (Registry)**:
 {% for tool in tool_list %}
 - {{ tool }}
 {% endfor %}
 
 {% if user_preferences %}
-USER PREFERENCES:
+**USER PREFERENCES**:
 {{ user_preferences | tojson(indent=2) }}
 {% endif %}
 
 {% if constraints %}
-CONSTRAINTS:
-{{ constraints | tojson(indent=2) }}
-{% endif %}
-
-{% if few_shot_examples %}
-EXAMPLES:
-{% for example in few_shot_examples %}
-Example {{ loop.index }}:
-Input: {{ example.goal }}
-Output: {{ example.plan | tojson(indent=2) }}
+**GOAL CONSTRAINTS**:
+{% for constraint in constraints %}
+- {{ constraint }}
 {% endfor %}
 {% endif %}
 
-Generate a detailed execution plan following the standard schema. Return ONLY the JSON object.
+{% if lessons_learned or past_experiences %}
+**PAST EXPERIENCES & LESSONS LEARNED**:
+{% if past_experiences %}
+{% for experience in past_experiences %}
+- {{ experience }}
+{% endfor %}
+{% endif %}
+{% if lessons_learned %}
+{% for lesson in lessons_learned %}
+- {{ lesson }}
+{% endfor %}
+{% endif %}
+{% endif %}
+
+{% if feedback %}
+**PREVIOUS ATTEMPT FEEDBACK (Self-Correction)**:
+{{ feedback }}
+{% endif %}
+
+---
+
+### INSTRUCTIONS
+1. Analyze the input goal and available tools.
+2. Formulate a step-by-step plan that optimizes for safety and efficiency.
+3. Identify dependencies: A step depends on another if it requires its output or if the order is logically necessary.
+4. If multiple steps are independent, they should have empty `dependencies` arrays to allow parallel execution.
+
+{% if few_shot_examples %}
+### GUIDELINE EXAMPLES
+{% for example in few_shot_examples %}
+Example {{ loop.index }}:
+Input Goal: {{ example.goal }}
+Output JSON:
+{{ example.output | tojson(indent=2) }}
+---
+{% endfor %}
+{% endif %}
+
+Generate the JSON plan now. Return ONLY the JSON object.

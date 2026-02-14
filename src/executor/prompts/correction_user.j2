@@ -1,0 +1,42 @@
+### CORRECTION CONTEXT
+The previous execution of the following step **FAILED** verification.
+
+**STEP**:
+{{ step_definition | tojson(indent=2) }}
+
+**PREVIOUS TOOL CALLED**:
+{{ previous_action }}
+
+**PREVIOUS PARAMETERS**:
+{{ previous_params | tojson(indent=2) }}
+
+**OBSERVED OUTPUT**:
+{{ previous_output | tojson(indent=2) }}
+
+**VERIFICATION ISSUES**:
+{% for issue in issues %}
+- {{ issue }}
+{% endfor %}
+
+**AVAILABLE ARTIFACTS**:
+{{ available_artifacts | tojson(indent=2) }}
+
+**TOOLS AVAILABLE**:
+{% for tool in tool_list %}
+- {{ tool }}
+{% endfor %}
+
+{% if user_preferences %}
+**USER PREFERENCES**:
+{{ user_preferences | tojson(indent=2) }}
+{% endif %}
+
+---
+
+### INSTRUCTIONS
+1. Analyze why the previous attempt failed based on the issues listed.
+2. Formulate a CORRECTED tool call that addresses these issues.
+3. If the previous parameters were incorrect, fix them. If the tool choice was wrong, select a better one.
+4. Your `reasoning` must explain the corrective action you are taking.
+
+Generate the corrected execution JSON now. Return ONLY the JSON object.

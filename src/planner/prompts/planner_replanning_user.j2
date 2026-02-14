@@ -1,14 +1,23 @@
-ORIGINAL GOAL: {{ goal }}
+### REPLANNING CONTEXT
+**ORIGINAL GOAL**: {{ goal }}
 
-CURRENT PLAN STEPS:
+**CURRENT PLAN STATUS**:
 {% for step in steps %}
-- [{{ step.status }}] {{ step.description }}
+- [{{ step.status }}] {{ step.id }}: {{ step.description }}
 {% endfor %}
 
-FAILURE REASON / FEEDBACK:
+**FAILURE REASON / FEEDBACK**:
 {{ feedback }}
 
-AVAILABLE ARTIFACTS:
+**AVAILABLE ARTIFACTS**:
 {{ available_artifacts | tojson(indent=2) }}
 
-Update the remaining steps of the plan to account for this information. Ensure the path to the original goal remains clear. Return ONLY the updated JSON plan.
+---
+
+### INSTRUCTIONS
+1. Analyze why the previous plan failed or needs adjustment based on the feedback and available artifacts.
+2. Re-evaluate the dependency graph. Some completed steps might need to be re-run, or new steps inserted.
+3. Formulate an updated strategy in your `reasoning` field.
+4. Output the full updated plan, including both completed and new/updated steps, ensuring the `step_id`s remain consistent where possible.
+
+Generate the updated JSON plan following the standard schema (including `reasoning` and `steps`). Return ONLY the JSON object.

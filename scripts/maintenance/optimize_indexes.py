@@ -7,8 +7,8 @@ async def optimize():
     """Runs database optimization commands like index rebuilding."""
     logger.info("Starting database optimization...")
 
-    client = AsyncIOMotorClient(settings.MONGODB_URL)
-    db = client[settings.MONGODB_DB_NAME]
+    client = AsyncIOMotorClient(settings.database.mongodb_uri)
+    db = client[settings.database.mongodb_db]
 
     # Example: Re-index collections
     for coll_name in ["tasks", "state", "trace", "memory"]:

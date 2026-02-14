@@ -16,6 +16,9 @@ class WorkingMemory:
     def get(self, key: str, default: Any = None) -> Any:
         return self.context.working_variables.get(key, default)
 
+    def add_step_log(self, step_id: str, action: str, description: str, output: Any = None):
+        self.context.add_step_log(step_id, action, description, output)
+
     def add_observation(self, note: str):
         self.context.add_note(note)
 

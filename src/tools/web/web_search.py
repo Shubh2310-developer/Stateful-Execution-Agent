@@ -1,22 +1,28 @@
 from typing import Any, Dict, List
 import httpx
-from src.tools.base_tool import BaseTool, ToolMetadata
+from src.tools.base import BaseTool, ToolMetadata
 from src.utils.logger import logger
 
 class WebSearchTool(BaseTool):
+    """Tool for searching the web for information."""
+
     @property
     def metadata(self) -> ToolMetadata:
         return ToolMetadata(
             name="web_search",
             description="Search the web for current information and news.",
-            input_schema={
-                "query": "string",
-                "max_results": "integer"
+            parameters={
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "The search query"},
+                    "max_results": {"type": "integer", "description": "Maximum number of results to return", "default": 5}
+                },
+                "required": ["query"]
             },
-            output_type="list"
+            returns={"type": "array", "items": {"type": "object"}, "description": "List of search results"}
         )
 
-    async def run(self, query: str, max_results: int = 5) -> List[Dict[str, Any]]:
+    async def execute(self, query: str, max_results: int = 5, **kwargs) -> List[Dict[str, Any]]:
         logger.info(f"Searching the web for: {query}")
 
         # In a real implementation, this would call a Search API (Serper, Tavily, etc.)

@@ -7,13 +7,7 @@ from src.core.config import settings
 
 def migrate():
     print("Running migration: 001_initial_schema")
-    conn = psycopg2.connect(
-        host=settings.POSTGRES_SERVER,
-        user=settings.POSTGRES_USER,
-        password=settings.POSTGRES_PASSWORD,
-        port=settings.POSTGRES_PORT,
-        dbname=settings.POSTGRES_DB
-    )
+    conn = psycopg2.connect(settings.database.postgres_uri)
     cur = conn.cursor()
 
     # Create a simple table for relational data example

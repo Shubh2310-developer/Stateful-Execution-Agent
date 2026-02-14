@@ -33,8 +33,8 @@ async def test_run_step_success():
 
         # Patch artifact manager create_artifact
         mock_artifact_manager.create_artifact = AsyncMock(return_value=Artifact(
-            artifact_id="art_1", task_id="t1", step_id="s1", type="data",
-            format="json", storage_uri="file:///tmp/1.json", created_at=datetime.utcnow()
+            id="art_1", task_id="t1", step_id="s1", type="data",
+            uri="file:///tmp/1.json", created_at=datetime.utcnow()
         ))
 
         step = Step(
@@ -45,7 +45,7 @@ async def test_run_step_success():
         result = await runner.run_step("task_001", step, {})
 
         assert result["status"] == "completed"
-        assert result["artifact"].artifact_id == "art_1"
+        assert result["artifact"].id == "art_1"
         assert result["decision"].choice_made == "web_search"
         assert result["decision"].confidence == 0.95
 

@@ -28,6 +28,9 @@ class PromptBuilder:
         tool_list: List[str],
         user_preferences: Optional[Dict[str, Any]] = None,
         constraints: Optional[List[str]] = None,
+        lessons_learned: Optional[List[str]] = None,
+        past_experiences: Optional[List[str]] = None,
+        feedback: Optional[str] = None,
         include_examples: bool = True
     ) -> List[Dict[str, str]]:
         """Builds the planner prompt using Jinja2 templates."""
@@ -37,8 +40,8 @@ class PromptBuilder:
         few_shot_examples = None
         if include_examples:
             try:
-                from src.planner.prompts.few_shot_examples import FEW_SHOT_EXAMPLES
-                few_shot_examples = FEW_SHOT_EXAMPLES
+                from src.planner.prompts.few_shot_examples import PLANNER_EXAMPLES
+                few_shot_examples = PLANNER_EXAMPLES
             except ImportError:
                 pass
 
@@ -48,6 +51,9 @@ class PromptBuilder:
             tool_list=tool_list,
             user_preferences=user_preferences,
             constraints=constraints,
+            lessons_learned=lessons_learned,
+            past_experiences=past_experiences,
+            feedback=feedback,
             few_shot_examples=few_shot_examples
         )
 
@@ -97,6 +103,7 @@ class PromptBuilder:
         available_artifacts: Dict[str, Any],
         tool_list: List[str],
         user_preferences: Optional[Dict[str, Any]] = None,
+        context: Optional[Dict[str, Any]] = None,
         include_examples: bool = True
     ) -> List[Dict[str, str]]:
         """Builds the executor prompt using Jinja2 templates."""
@@ -121,6 +128,7 @@ class PromptBuilder:
             available_artifacts=available_artifacts,
             tool_list=tool_list,
             user_preferences=user_preferences,
+            context=context,
             few_shot_examples=few_shot_examples
         )
 
@@ -151,19 +159,215 @@ class PromptBuilder:
             {"role": "user", "content": user_content}
         ]
 
+    def build_plan_validator_prompt(
+        self,
+        goal: Dict[str, Any],
+        steps: List[Dict[str, Any]],
+        available_tools: List[str],
+        include_examples: bool = True
+    ) -> List[Dict[str, str]]:
+        """Builds the plan validation prompt for quality auditing."""
+        system_template = self.env.get_template("planner/prompts/validator_system.j2")
+        user_template = self.env.get_template("planner/prompts/validator_user.j2")
+
+        few_shot_examples = None
+        if include_examples:
+            try:
+                from src.planner.prompts.few_shot_examples import PLAN_VALIDATOR_EXAMPLES
+                few_shot_examples = PLAN_VALIDATOR_EXAMPLES
+            except ImportError:
+                pass
+
+        system_content = system_template.render()
+        user_content = user_template.render(
+            goal=goal,
+            steps=steps,
+            available_tools=available_tools,
+            few_shot_examples=few_shot_examples
+        )
+
+        return [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content}
+        ]
+
     def build_goal_parser_prompt(
         self,
         raw_goal: str,
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
+        include_examples: bool = True
     ) -> List[Dict[str, str]]:
         """Builds the goal parsing prompt."""
         system_template = self.env.get_template("planner/prompts/goal_parser_system.j2")
         user_template = self.env.get_template("planner/prompts/goal_parser_user.j2")
 
+        few_shot_examples = None
+        if include_examples:
+            try:
+                from src.planner.prompts.few_shot_examples import GOAL_PARSER_EXAMPLES
+                few_shot_examples = GOAL_PARSER_EXAMPLES
+            except ImportError:
+                pass
+
         system_content = system_template.render()
         user_content = user_template.render(
             raw_goal=raw_goal,
-            context=context
+            context=context,
+            few_shot_examples=few_shot_examples
+        )
+
+        return [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content}
+        ]
+
+    def build_reviewer_prompt(
+        self,
+        goal: Dict[str, Any],
+        plan_steps: List[Dict[str, Any]],
+        artifacts: List[Dict[str, Any]]
+    ) -> List[Dict[str, str]]:
+        """Builds the end-to-end review prompt."""
+        system_template = self.env.get_template("reviewer/prompts/reviewer_system.j2")
+        user_template = self.env.get_template("reviewer/prompts/reviewer_user.j2")
+
+        system_content = system_template.render()
+        user_content = user_template.render(
+            goal=goal,
+            plan_steps=plan_steps,
+            artifacts=artifacts
+        )
+
+        return [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content}
+        ]
+
+    def build_quality_checker_prompt(
+        self,
+        artifact_type: str,
+        artifact_id: str,
+        content: Any
+    ) -> List[Dict[str, str]]:
+        """Builds the deep artifact quality check prompt."""
+        system_template = self.env.get_template("reviewer/prompts/quality_checker_system.j2")
+        user_template = self.env.get_template("reviewer/prompts/quality_checker_user.j2")
+
+        system_content = system_template.render()
+        user_content = user_template.render(
+            artifact_type=artifact_type,
+            artifact_id=artifact_id,
+            content=content
+        )
+
+        return [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content}
+        ]
+
+    def build_summarizer_prompt(
+        self,
+        text: str,
+        focus: Optional[str] = None
+    ) -> List[Dict[str, str]]:
+        """Builds the summarizer tool prompt."""
+        system_template = self.env.get_template("tools/document/prompts/summarizer_system.j2")
+        user_template = self.env.get_template("tools/document/prompts/summarizer_user.j2")
+
+        system_content = system_template.render()
+        user_content = user_template.render(
+            text=text,
+            focus=focus
+        )
+
+        return [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content}
+        ]
+
+    def build_correction_prompt(
+        self,
+        step: Step,
+        previous_action: str,
+        previous_params: Dict[str, Any],
+        previous_output: Any,
+        issues: List[str],
+        available_artifacts: Dict[str, Any],
+        tool_list: List[str],
+        user_preferences: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, str]]:
+        """Builds the correction prompt for self-correction loops."""
+        system_template = self.env.get_template("executor/prompts/executor_system.j2")
+        user_template = self.env.get_template("executor/prompts/correction_user.j2")
+
+        system_content = system_template.render()
+
+        # Convert Pydantic model to dict for Jinja2
+        step_dict = step.dict() if hasattr(step, 'dict') else step
+
+        user_content = user_template.render(
+            step_definition=step_dict,
+            previous_action=previous_action,
+            previous_params=previous_params,
+            previous_output=previous_output,
+            issues=issues,
+            available_artifacts=available_artifacts,
+            tool_list=tool_list,
+            user_preferences=user_preferences
+        )
+
+        return [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content}
+        ]
+
+    def build_reflection_prompt(
+        self,
+        goal: str,
+        status: str,
+        logs: List[Dict[str, Any]],
+        artifacts: List[Dict[str, Any]],
+        feedback: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, str]]:
+        """Builds the deep reflection prompt."""
+        system_template = self.env.get_template("memory/learning/prompts/reflection_system.j2")
+        user_template = self.env.get_template("memory/learning/prompts/reflection_user.j2")
+
+        system_content = system_template.render()
+        user_content = user_template.render(
+            goal=goal,
+            status=status,
+            logs=logs,
+            artifacts=artifacts,
+            feedback=feedback
+        )
+
+        return [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content}
+        ]
+
+    def build_adaptation_prompt(
+        self,
+        goal: str,
+        status: str,
+        steps: List[Dict[str, Any]],
+        artifacts: List[Dict[str, Any]],
+        logs: Optional[List[Dict[str, Any]]] = None,
+        feedback: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, str]]:
+        """Builds the adaptation/learning prompt."""
+        system_template = self.env.get_template("memory/learning/prompts/adaptation_system.j2")
+        user_template = self.env.get_template("memory/learning/prompts/adaptation_user.j2")
+
+        system_content = system_template.render()
+        user_content = user_template.render(
+            goal=goal,
+            status=status,
+            steps=steps,
+            artifacts=artifacts,
+            logs=logs,
+            feedback=feedback
         )
 
         return [

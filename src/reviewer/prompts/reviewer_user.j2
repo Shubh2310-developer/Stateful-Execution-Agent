@@ -1,0 +1,24 @@
+### TASK CONTEXT
+**ORIGINAL GOAL**:
+{{ goal | tojson(indent=2) }}
+
+**PLAN EXECUTED**:
+{% for step in plan_steps %}
+- [{{ step.status }}] {{ step.step_id }}: {{ step.description }}
+{% endfor %}
+
+**ARTIFACTS PRODUCED**:
+{% for artifact in artifacts %}
+- ID: {{ artifact.id }}
+  Type: {{ artifact.type }}
+  URI: {{ artifact.uri }}
+{% endfor %}
+
+---
+
+### INSTRUCTIONS
+1. Perform the end-to-end review required by your Operational Protocol.
+2. Evaluate if the collective output of all steps satisfies the original user request.
+3. Provide critical feedback on any missing components or quality issues.
+
+Return ONLY the JSON object.

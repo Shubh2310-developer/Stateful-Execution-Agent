@@ -1,8 +1,28 @@
-USER REQUEST: {{ raw_goal }}
+### USER REQUEST
+"{{ raw_goal }}"
 
 {% if context %}
-CONTEXT:
+### RELEVANT CONTEXT
 {{ context | tojson(indent=2) }}
 {% endif %}
 
-Please transform this request into a structured goal definition. Return ONLY the JSON object.
+{% if few_shot_examples %}
+### GUIDELINE EXAMPLES
+{% for example in few_shot_examples %}
+Example {{ loop.index }}:
+Input Request: "{{ example.raw_goal }}"
+Output JSON:
+{{ example.output | tojson(indent=2) }}
+---
+{% endfor %}
+{% endif %}
+
+---
+
+### INSTRUCTIONS
+1. Analyze the user request to extract the formal intent and success metrics.
+2. Consider the provided context for any relevant constraints or entities.
+3. Formulate your semantic analysis in the `reasoning` field first.
+4. Generate the structured goal definition as a JSON object.
+
+Return ONLY the JSON object.

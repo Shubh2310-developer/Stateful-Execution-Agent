@@ -7,9 +7,9 @@ from src.core.config import settings
 from src.utils.logger import logger
 
 app = FastAPI(
-    title=settings.APP_NAME,
+    title=settings.app.name,
     description="Stateful Execution Agent API",
-    version="1.0.0",
+    version=settings.app.version,
 )
 
 # Set up Middleware
@@ -26,25 +26,27 @@ app.add_middleware(
 )
 
 # Include Routers
-app.include_router(tasks.router, prefix=settings.API_V1_STR)
-app.include_router(health.router, prefix=settings.API_V1_STR)
-app.include_router(state.router, prefix=settings.API_V1_STR)
-app.include_router(artifacts.router, prefix=settings.API_V1_STR)
-app.include_router(memory.router, prefix=settings.API_V1_STR)
-app.include_router(trace.router, prefix=settings.API_V1_STR)
+app.include_router(tasks.router, prefix=settings.app.api_v1_str)
+app.include_router(health.router, prefix=settings.app.api_v1_str)
+app.include_router(state.router, prefix=settings.app.api_v1_str)
+app.include_router(artifacts.router, prefix=settings.app.api_v1_str)
+app.include_router(memory.router, prefix=settings.app.api_v1_str)
+app.include_router(trace.router, prefix=settings.app.api_v1_str)
 
 @app.on_event("startup")
 async def startup_event():
-    logger.info(f"Starting up {settings.APP_NAME} in {settings.ENV} mode")
+    logger.info(f"Starting up {settings.app.name} in {settings.app.env} mode")
+    from src.tools.tool_registry import tool_registry
+    tool_registry.discover_tools()
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    logger.info(f"Shutting down {settings.APP_NAME}")
+    logger.info(f"Shutting down {settings.app.name}")
 
 @app.get("/")
 async def root():
     return {
-        "app": settings.APP_NAME,
-        "version": "1.0.0",
+        "app": settings.app.name,
+        "version": settings.app.version,
         "status": "online"
     }

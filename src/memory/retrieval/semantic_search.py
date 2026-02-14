@@ -1,40 +1,59 @@
+import numpy as np
 from typing import List, Dict, Any, Optional
-from src.core.types import UserMemory
+from src.core.types import UserMemory, HistoricalPattern
 from src.utils.logger import logger
+from src.memory.memory_manager import MemoryManager
+
+# Lazy imports for optional heavy dependencies
+_model = None
+
+def get_model():
+    global _model
+    if _model is None:
+        from sentence_transformers import SentenceTransformer
+        _model = SentenceTransformer('all-MiniLM-L6-v2')
+    return _model
 
 class SemanticSearch:
-    """Provides similarity-based retrieval of past experiences and knowledge."""
+    """Provides similarity-based retrieval of past experiences and knowledge using vector embeddings."""
+
+    def __init__(self, memory_manager: Optional[MemoryManager] = None):
+        self.model_name = 'all-MiniLM-L6-v2'
+        self.memory_manager = memory_manager or MemoryManager()
+        logger.info(f"Initialized SemanticSearch with model: {self.model_name}")
 
     async def find_relevant_patterns(
         self,
         query: str,
-        memory: UserMemory,
+        user_id: str,
         limit: int = 3
-    ) -> List[Dict[str, Any]]:
+    ) -> List[HistoricalPattern]:
         """
-        Simple keyword-based relevance for now.
-        Future: Use sentence-transformers for real semantic search.
+        Uses sentence-transformers to generate embeddings and queries MongoDB for similar patterns.
         """
         logger.debug(f"Searching for relevant patterns for query: {query}")
-        patterns = memory.historical_patterns
-        if not patterns:
+
+        try:
+            # 1. Generate query embedding
+            query_embedding = self.generate_embedding(query)
+
+            # 2. Search database
+            results = await self.memory_manager.search_patterns(
+                user_id=user_id,
+                query_vector=query_embedding,
+                limit=limit
+            )
+
+            if not results:
+                logger.info("No vector search results found for the query.")
+
+            return results
+        except Exception as e:
+            logger.error(f"Semantic search failed: {str(e)}")
             return []
 
-        # Simple case-insensitive keyword match on 'task_type' or 'description'
-        query_words = query.lower().split()
-        scored_patterns = []
-
-        for p in patterns:
-            score = 0
-            text_to_search = (p.get("task_type", "") + " " + p.get("approach", "")).lower()
-            for word in query_words:
-                if word in text_to_search:
-                    score += 1
-
-            if score > 0:
-                scored_patterns.append((score, p))
-
-        # Sort by score descending
-        scored_patterns.sort(key=lambda x: x[0], reverse=True)
-
-        return [p for score, p in scored_patterns[:limit]]
+    def generate_embedding(self, text: str) -> List[float]:
+        """Generates a vector embedding for the given text."""
+        model = get_model()
+        embedding = model.encode([text])[0]
+        return embedding.tolist()

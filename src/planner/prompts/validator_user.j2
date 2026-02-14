@@ -1,0 +1,27 @@
+ORIGINAL GOAL:
+{{ goal | tojson(indent=2) }}
+
+PROPOSED PLAN:
+{% for step in steps %}
+Step {{ loop.index }}: {{ step.description }}
+- Tool: {{ step.tools | join(', ') }}
+- Dependencies: {{ step.dependencies | join(', ') }}
+- Success Criteria: {{ step.success_criteria }}
+{% endfor %}
+
+AVAILABLE TOOLS:
+{{ available_tools | join(', ') }}
+
+{% if few_shot_examples %}
+### GUIDELINE EXAMPLES
+{% for example in few_shot_examples %}
+Example {{ loop.index }}:
+Input Goal: {{ example.goal | tojson }}
+Input Plan: {{ example.steps | tojson }}
+Output JSON:
+{{ example.output | tojson(indent=2) }}
+---
+{% endfor %}
+{% endif %}
+
+Please audit this plan for completeness, feasibility, and safety. Return ONLY the JSON object.

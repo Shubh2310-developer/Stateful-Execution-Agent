@@ -65,7 +65,7 @@ async def continue_task(task_id: str, request: TaskUpdate):
 
         result = await task_router.handle_request(
             user_id=state.user_id,
-            goal=request.user_input or state.goal.get("request", ""),
+            goal=request.user_input or state.goal.request,
             task_id=task_id
         )
         return result

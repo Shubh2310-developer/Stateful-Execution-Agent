@@ -1,22 +1,28 @@
 from typing import Any, Dict, List, Optional
-from src.tools.base_tool import BaseTool, ToolMetadata
+from src.tools.base import BaseTool, ToolMetadata
 from src.utils.logger import logger
 
 class MetricsAnalyzerTool(BaseTool):
+    """Tool for calculating KPIs and performing data analysis."""
+
     @property
     def metadata(self) -> ToolMetadata:
         return ToolMetadata(
             name="metrics_analyzer",
             description="Calculate KPIs, growth rates, and perform data analysis.",
-            input_schema={
-                "data": "object",
-                "metrics": "array",
-                "comparison_period": "string"
+            parameters={
+                "type": "object",
+                "properties": {
+                    "data": {"type": "object", "description": "The data to analyze"},
+                    "metrics": {"type": "array", "items": {"type": "string"}, "description": "List of metrics to calculate"},
+                    "comparison_period": {"type": "string", "description": "Optional period for comparison"}
+                },
+                "required": ["data", "metrics"]
             },
-            output_type="object"
+            returns={"type": "object", "description": "The calculated metrics results"}
         )
 
-    async def run(self, data: Dict[str, Any], metrics: List[str], comparison_period: Optional[str] = None) -> Dict[str, Any]:
+    async def execute(self, data: Dict[str, Any], metrics: List[str], comparison_period: Optional[str] = None, **kwargs) -> Dict[str, Any]:
         logger.info(f"Analyzing metrics: {metrics}")
 
         results = {}

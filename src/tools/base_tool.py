@@ -1,19 +1,4 @@
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List
-from pydantic import BaseModel
+from src.tools.base import BaseTool, ToolMetadata
 
-class ToolMetadata(BaseModel):
-    name: str
-    description: str
-    input_schema: Dict[str, Any]
-    output_type: str
-
-class BaseTool(ABC):
-    @property
-    @abstractmethod
-    def metadata(self) -> ToolMetadata:
-        pass
-
-    @abstractmethod
-    async def run(self, **kwargs) -> Any:
-        pass
+# This module is deprecated. Please use src.tools.base instead.
+__all__ = ["BaseTool", "ToolMetadata"]

@@ -1,3 +1,3 @@
-from src.reviewer.prompts.review_templates import REVIEW_TEMPLATE, REVISION_TEMPLATE
-
-__all__ = ["REVIEW_TEMPLATE", "REVISION_TEMPLATE"]
+# This file is intentionally minimal as prompts are now managed via Jinja2 templates
+# and the PromptBuilder class.
+__all__ = []

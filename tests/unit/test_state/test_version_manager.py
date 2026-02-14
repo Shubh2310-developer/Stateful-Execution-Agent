@@ -1,55 +1,78 @@
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock
 from src.state.version_manager import VersionManager
 from src.state.state_schema import TaskStateSchema
 from datetime import datetime
 
-@pytest.mark.asyncio
-async def test_create_snapshot():
-    # Use patch to avoid real MongoDB connection in __init__
-    with patch("src.state.version_manager.AsyncIOMotorClient") as mock_client:
-        mock_db = mock_client.return_value[ "test_db" ]
-        mock_collection = mock_db.state_history
-        mock_collection.insert_one = AsyncMock(return_value=MagicMock())
-
-        manager = VersionManager()
-        state = TaskStateSchema(task_id="t1", user_id="u1", goal={"r": "g"})
-
-        success = await manager.create_snapshot(state)
-
-        assert success is True
-        mock_collection.insert_one.assert_called_once()
-        # Verify snapshot contains task_id
-        call_args = mock_collection.insert_one.call_args[0][0]
-        assert call_args["task_id"] == "t1"
-        assert "snapshot_at" in call_args
+@pytest.fixture
+def mock_db_adapter():
+    adapter = MagicMock()
+    adapter.versions = MagicMock()
+    adapter.save_state = AsyncMock()
+    adapter.get_state_history = AsyncMock()
+    return adapter
 
 @pytest.mark.asyncio
-async def test_get_history():
-    with patch("src.state.version_manager.AsyncIOMotorClient") as mock_client:
-        mock_db = mock_client.return_value[ "test_db" ]
-        mock_collection = mock_db.state_history
+async def test_create_snapshot(mock_db_adapter):
+    manager = VersionManager(db_adapter=mock_db_adapter)
+    state = TaskStateSchema(
+        task_id="t1",
+        user_id="u1",
+        goal={
+            "request": "test goal",
+            "success_criteria": ["done"]
+        },
+        version_counter=1
+    )
 
-        # Mock cursor for find()
-        mock_cursor = MagicMock()
-        mock_cursor.sort.return_value = mock_cursor
+    mock_db_adapter.save_state.return_value = True
+    success = await manager.create_snapshot(state, summary="Checkpoint")
 
-        # Mocking async iterator
-        history_docs = [
-            {"task_id": "t1", "user_id": "u1", "goal": {"r": "g"}, "status": "pending", "updated_at": datetime.utcnow(), "created_at": datetime.utcnow()},
-            {"task_id": "t1", "user_id": "u1", "goal": {"r": "g"}, "status": "completed", "updated_at": datetime.utcnow(), "created_at": datetime.utcnow()}
-        ]
+    assert success is True
+    mock_db_adapter.save_state.assert_called_once_with(
+        state, is_milestone=True, summary="Checkpoint"
+    )
 
-        async def mock_async_iter():
-            for doc in history_docs:
-                yield doc
+@pytest.mark.asyncio
+async def test_get_history(mock_db_adapter):
+    manager = VersionManager(db_adapter=mock_db_adapter)
+    history_docs = [
+        {"task_id": "t1", "version": 2, "snapshot": {}},
+        {"task_id": "t1", "version": 1, "snapshot": {}}
+    ]
+    mock_db_adapter.get_state_history.return_value = history_docs
 
-        mock_cursor.__aiter__.side_effect = mock_async_iter
-        mock_collection.find.return_value = mock_cursor
+    history = await manager.get_history("t1")
 
-        manager = VersionManager()
-        history = await manager.get_history("t1")
+    assert len(history) == 2
+    assert history[0]["version"] == 2
+    mock_db_adapter.get_state_history.assert_called_once_with("t1", limit=20)
 
-        assert len(history) == 2
-        assert history[0].task_id == "t1"
-        mock_collection.find.assert_called_once_with({"task_id": "t1"})
+@pytest.mark.asyncio
+async def test_rollback(mock_db_adapter):
+    manager = VersionManager(db_adapter=mock_db_adapter)
+
+    snapshot_data = {
+        "task_id": "t1",
+        "user_id": "u1",
+        "goal": {
+            "request": "test goal",
+            "success_criteria": ["done"]
+        },
+        "version_counter": 1,
+        "status": "PENDING"
+    }
+
+    mock_db_adapter.versions.find_one = AsyncMock(return_value={
+        "task_id": "t1",
+        "version": 1,
+        "snapshot": snapshot_data
+    })
+    mock_db_adapter.save_state.return_value = True
+
+    rolled_back_state = await manager.rollback("t1", 1)
+
+    assert rolled_back_state is not None
+    assert rolled_back_state.task_id == "t1"
+    mock_db_adapter.versions.find_one.assert_called_once_with({"task_id": "t1", "version": 1})
+    mock_db_adapter.save_state.assert_called_once()

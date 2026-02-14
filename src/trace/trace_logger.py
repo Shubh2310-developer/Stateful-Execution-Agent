@@ -6,12 +6,17 @@ from src.utils.logger import logger
 from datetime import datetime
 from uuid import uuid4
 
+from src.state.persistence.database_adapter import DatabaseAdapter
+
 class TraceLogger:
     """Logs detailed execution events and context for auditability."""
 
-    def __init__(self):
-        self.client = AsyncIOMotorClient(settings.MONGODB_URL)
-        self.db = self.client[settings.MONGODB_DB_NAME]
+    def __init__(self, db_adapter: Optional[DatabaseAdapter] = None):
+        if db_adapter:
+            self.db = db_adapter.db
+        else:
+            self.client = AsyncIOMotorClient(settings.database.mongodb_uri)
+            self.db = self.client[settings.database.mongodb_db]
         self.collection = self.db.trace
 
     async def log_event(

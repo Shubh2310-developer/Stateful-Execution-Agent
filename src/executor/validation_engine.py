@@ -30,6 +30,11 @@ class ValidationEngine:
         try:
             response_text = await groq_client.generate_response(messages)
             validation_result = ResponseParser.parse_json_response(response_text)
+
+            # Log the Chain-of-Thought reasoning
+            reasoning = validation_result.get("reasoning", "No reasoning provided.")
+            logger.info(f"Validator Reasoning for {step_id}: {reasoning}")
+
             logger.info(f"Validation result for {step_id}: {'PASSED' if validation_result.get('passed') else 'FAILED'}")
             return validation_result
         except Exception as e:

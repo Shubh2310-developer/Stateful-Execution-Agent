@@ -1,18 +1,21 @@
-STEP DESCRIPTION:
-{{ step_description }}
+### AUDIT CONTEXT
+**STEP DESCRIPTION**:
+"{{ step_description }}"
 
-SUCCESS CRITERIA:
+**SUCCESS CRITERIA**:
 {% for criterion in success_criteria %}
 - {{ criterion }}
 {% endfor %}
 
-OUTPUT TO VALIDATE:
+**OUTPUT TO VALIDATE**:
 {{ step_output | tojson(indent=2) }}
 
-Return your evaluation as a JSON object:
-{
-  "passed": bool,
-  "reasoning": str,
-  "quality_score": float,
-  "issues": list[str]
-}
+---
+
+### INSTRUCTIONS
+1. Perform the point-by-point evidence review required by your Operational Protocol.
+2. Compare the tool output against the success criteria with a high degree of skepticism.
+3. If the output contains errors (e.g., HTTP 404s, empty results, schema mismatches), flag them in the `issues` list and set `passed` to false.
+4. Your `reasoning` must explain why each criterion was or was not met.
+
+Return ONLY the JSON object.

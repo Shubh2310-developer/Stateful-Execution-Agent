@@ -1,0 +1,32 @@
+### REFLECTION CONTEXT: {{ goal }}
+**FINAL STATUS**: {{ status }}
+
+#### EXECUTION TRACE:
+{% for log in logs %}
+[Step: {{ log.step_id }}]
+Action: {{ log.action }}
+Description: {{ log.description }}
+Output Snippet: {{ log.output }}
+---
+{% endfor %}
+
+#### ARTIFACTS PRODUCED:
+{% for artifact in artifacts %}
+- {{ artifact.type }} (ID: {{ artifact.id }}): {{ artifact.uri }}
+{% endfor %}
+
+{% if feedback %}
+#### USER FEEDBACK:
+{{ feedback | tojson(indent=2) }}
+{% endif %}
+
+---
+
+### INSTRUCTIONS:
+Perform a deep reflection on this task.
+1. Identify **Insights**: What did we learn about the task domain or the user's implicit needs?
+2. Identify **Patterns**: What successful strategies emerged that we should reuse?
+3. Identify **Corrections**: What mistakes were made, and how should we adjust our tools or planning to avoid them?
+
+Generate the JSON reflection summary according to the system instructions.
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
