@@ -1,20 +1,23 @@
 ### AUDIT CONTEXT
-**STEP DESCRIPTION**:
+<step_description>
 "{{ step_description }}"
+</step_description>
 
-**SUCCESS CRITERIA**:
-{% for criterion in success_criteria %}
+<success_criteria>
+{% for criterion in success_criteria or ["Output must be relevant and useful"] %}
 - {{ criterion }}
 {% endfor %}
+</success_criteria>
 
-**OUTPUT TO VALIDATE**:
+<output_to_validate>
 {{ step_output | tojson(indent=2) }}
+</output_to_validate>
 
 ---
 
 ### INSTRUCTIONS
 1. Perform the point-by-point evidence review required by your Operational Protocol.
-2. Compare the tool output against the success criteria with a high degree of skepticism.
+2. Compare the tool output against the success criteria with reasonable flexibility - focus on usefulness rather than exact matches.
 3. If the output contains errors (e.g., HTTP 404s, empty results, schema mismatches), flag them in the `issues` list and set `passed` to false.
 4. Your `reasoning` must explain why each criterion was or was not met.
 

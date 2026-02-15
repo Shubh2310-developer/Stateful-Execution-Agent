@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 from src.executor.step_runner import StepRunner
 from src.core.types import Step, Artifact
-from datetime import datetime
+from datetime import datetime, timezone
 
 @pytest.mark.asyncio
 async def test_run_step_success():
@@ -34,7 +34,7 @@ async def test_run_step_success():
         # Patch artifact manager create_artifact
         mock_artifact_manager.create_artifact = AsyncMock(return_value=Artifact(
             id="art_1", task_id="t1", step_id="s1", type="data",
-            uri="file:///tmp/1.json", created_at=datetime.utcnow()
+            uri="file:///tmp/1.json", created_at=datetime.now(timezone.utc)
         ))
 
         step = Step(

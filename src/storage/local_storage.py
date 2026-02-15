@@ -10,8 +10,20 @@ class LocalStorage:
         if not os.path.exists(self.base_dir):
             os.makedirs(self.base_dir)
 
+    def _safe_path(self, key: str) -> str:
+        """Ensures the resolved path is within the base directory."""
+        # Remove leading slashes and handle '..'
+        clean_key = os.path.normpath(key).lstrip(os.sep)
+        if clean_key.startswith(".."):
+            raise ValueError(f"Invalid storage key: {key}")
+
+        full_path = os.path.join(os.path.abspath(self.base_dir), clean_key)
+        if not full_path.startswith(os.path.abspath(self.base_dir)):
+            raise ValueError(f"Access denied: {key} is outside base directory")
+        return full_path
+
     def put(self, key: str, data: Any) -> str:
-        file_path = os.path.join(self.base_dir, key)
+        file_path = self._safe_path(key)
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         mode = "wb" if isinstance(data, (bytes, bytearray)) else "w"
@@ -22,7 +34,11 @@ class LocalStorage:
         return f"file://{os.path.abspath(file_path)}"
 
     def get(self, key: str) -> Optional[bytes]:
-        file_path = os.path.join(self.base_dir, key)
+        try:
+            file_path = self._safe_path(key)
+        except ValueError:
+            return None
+
         if not os.path.exists(file_path):
             return None
 
@@ -31,13 +47,18 @@ class LocalStorage:
 
     def delete(self, key: str) -> bool:
         """Deletes a file from local storage."""
-        file_path = os.path.join(self.base_dir, key)
+        try:
+            file_path = self._safe_path(key)
+        except ValueError:
+            return False
+
         if os.path.exists(file_path):
             try:
                 os.remove(file_path)
                 # Try to remove empty parent directories
                 parent = os.path.dirname(file_path)
-                while parent != self.base_dir and not os.listdir(parent):
+                abs_base = os.path.abspath(self.base_dir)
+                while os.path.abspath(parent) != abs_base and not os.listdir(parent):
                     os.rmdir(parent)
                     parent = os.path.dirname(parent)
                 return True
@@ -48,5 +69,8 @@ class LocalStorage:
 
     def exists(self, key: str) -> bool:
         """Checks if a key exists in storage."""
-        file_path = os.path.join(self.base_dir, key)
-        return os.path.exists(file_path)
+        try:
+            file_path = self._safe_path(key)
+            return os.path.exists(file_path)
+        except ValueError:
+            return False

@@ -1,0 +1,25 @@
+Analyze the following user feedback and extract structured information.
+
+<user_feedback>
+"{{ text_feedback }}"
+</user_feedback>
+
+### INSTRUCTIONS
+Extract the following information in JSON format:
+1. sentiment_aspects: Dict with positive and negative aspects mentioned
+2. preference_signals: List of preference hints (e.g., "prefers concise", "wants more citations")
+3. quality_issues: List of quality problems mentioned
+4. categories: List of relevant categories (choose from: quality, speed, accuracy, format, tone, completeness, clarity, relevance)
+5. specific_mentions: Any specific steps, tools, or decisions mentioned
+
+Return ONLY valid JSON in this format:
+{
+    "sentiment_aspects": {
+        "positive": ["aspect1", "aspect2"],
+        "negative": ["aspect1", "aspect2"]
+    },
+    "preference_signals": ["signal1", "signal2"],
+    "quality_issues": ["issue1", "issue2"],
+    "categories": ["category1", "category2"],
+    "specific_mentions": ["mention1", "mention2"]
+}

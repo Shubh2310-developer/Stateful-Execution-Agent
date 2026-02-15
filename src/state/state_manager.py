@@ -5,7 +5,7 @@ from src.state.state_schema import TaskStateSchema
 from src.state.persistence.database_adapter import DatabaseAdapter
 from src.core.types import Goal, TaskStatus
 from src.utils.logger import logger
-from datetime import datetime
+from datetime import datetime, timezone
 
 class StateManager:
     """Manages the lifecycle and transitions of task states."""
@@ -29,9 +29,9 @@ class StateManager:
                 logger.warning(f"State checksum mismatch for task {task_id}! Potential corruption.")
         return state
 
-    async def save_state(self, state: TaskStateSchema, is_milestone: bool = False, summary: Optional[str] = None) -> bool:
+    async def save_state(self, task_id: str, state: TaskStateSchema, is_milestone: bool = False, summary: Optional[str] = None) -> bool:
         """Saves state with checksumming and version increment."""
-        state.updated_at = datetime.utcnow()
+        state.updated_at = datetime.now(timezone.utc)
         state.checksum = self._calculate_checksum(state)
 
         # DatabaseAdapter.save_state handles version_counter increment via $inc
@@ -61,14 +61,14 @@ class StateManager:
             version_counter=1
         )
         state.checksum = self._calculate_checksum(state)
-        await self.save_state(state, is_milestone=True, summary="Task initialization")
+        await self.save_state(task_id, state, is_milestone=True, summary="Task initialization")
         return state
 
     async def update_status(self, task_id: str, status: TaskStatus) -> bool:
         state = await self.get_state(task_id)
         if state:
             state.status = status
-            return await self.save_state(state)
+            return await self.save_state(task_id, state)
         return False
 
     async def add_artifact(self, task_id: str, artifact: Any) -> bool:
@@ -77,5 +77,5 @@ class StateManager:
         if state:
             state.artifacts.append(artifact)
             # Significant update, potentially a milestone
-            return await self.save_state(state, is_milestone=True, summary=f"Added artifact: {artifact.id}")
+            return await self.save_state(task_id, state, is_milestone=True, summary=f"Added artifact: {artifact.id}")
         return False

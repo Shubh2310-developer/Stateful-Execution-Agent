@@ -14,6 +14,7 @@ class TraceEntry(BaseModel):
     action_taken: Optional[Dict[str, Any]] = None
     outcome: Optional[Dict[str, Any]] = None
     metadata: Dict[str, Any] = {}
+    tags: List[str] = []
 
 class DecisionTrace(BaseModel):
     decision_id: str
@@ -26,3 +27,5 @@ class DecisionTrace(BaseModel):
     confidence_score: float
     risk_assessment: str = "low"
     final_choice: str
+    metadata: Dict[str, Any] = {}
+    tags: List[str] = []

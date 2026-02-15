@@ -1,16 +1,21 @@
 ### REPLANNING CONTEXT
-**ORIGINAL GOAL**: {{ goal }}
+<goal>
+{{ goal }}
+</goal>
 
-**CURRENT PLAN STATUS**:
+<current_plan_status>
 {% for step in steps %}
 - [{{ step.status }}] {{ step.id }}: {{ step.description }}
 {% endfor %}
+</current_plan_status>
 
-**FAILURE REASON / FEEDBACK**:
+<failure_reason_or_feedback>
 {{ feedback }}
+</failure_reason_or_feedback>
 
-**AVAILABLE ARTIFACTS**:
+<available_artifacts>
 {{ available_artifacts | tojson(indent=2) }}
+</available_artifacts>
 
 ---
 

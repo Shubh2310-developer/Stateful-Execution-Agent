@@ -1,31 +1,45 @@
 import asyncio
 from motor.motor_asyncio import AsyncIOMotorClient
 from src.core.config import settings
-from datetime import datetime
+from datetime import datetime, timezone
 
 async def seed_data():
     print(f"Connecting to MongoDB at {settings.database.mongodb_uri}...")
     client = AsyncIOMotorClient(settings.database.mongodb_uri)
     db = client[settings.database.mongodb_db]
 
-    # Seed a sample user profile/memory
-    user_id = "usr_demo_123"
+    # Seed a sample user profile/memory for the default API key user
+    # This ensures the frontend shows data immediately upon login/start
+    user_id = "usr_api_key_user"
     print(f"Seeding sample memory for user: {user_id}...")
 
     sample_memory = {
         "user_id": user_id,
         "profile": {
-            "role": "Software Engineer",
+            "role": "Senior Developer",
+            "communication_style": "Technical and concise",
+            "technical_depth": "expert",
             "preferences": {
-                "tone": "concise",
+                "tone": "professional",
                 "language": "Python"
             }
         },
+        "preferences": {
+            "document_tone": "professional",
+            "detail_level": "high",
+            "preferred_formats": ["markdown", "json"],
+            "formatting_rules": {}
+        },
+        "domain_knowledge": {
+            "architecture": "microservices",
+            "frameworks": ["fastapi", "react", "nextjs"]
+        },
         "historical_patterns": [],
-        "created_at": datetime.utcnow()
+        "created_at": datetime.now(timezone.utc),
+        "last_updated": datetime.now(timezone.utc)
     }
 
-    await db.memory.update_one(
+    await db.user_profiles.update_one(
         {"user_id": user_id},
         {"$set": sample_memory},
         upsert=True

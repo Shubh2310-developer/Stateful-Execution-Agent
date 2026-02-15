@@ -225,17 +225,30 @@ class PromptBuilder:
         self,
         goal: Dict[str, Any],
         plan_steps: List[Dict[str, Any]],
-        artifacts: List[Dict[str, Any]]
+        artifacts: List[Dict[str, Any]],
+        iteration_count: Optional[int] = None,
+        previous_feedback: Optional[str] = None,
+        include_examples: bool = True
     ) -> List[Dict[str, str]]:
         """Builds the end-to-end review prompt."""
         system_template = self.env.get_template("reviewer/prompts/reviewer_system.j2")
         user_template = self.env.get_template("reviewer/prompts/reviewer_user.j2")
 
-        system_content = system_template.render()
+        few_shot_examples = None
+        if include_examples:
+            try:
+                from src.reviewer.prompts.few_shot_examples import REVIEWER_EXAMPLES
+                few_shot_examples = REVIEWER_EXAMPLES
+            except ImportError:
+                pass
+
+        system_content = system_template.render(examples=few_shot_examples)
         user_content = user_template.render(
             goal=goal,
             plan_steps=plan_steps,
-            artifacts=artifacts
+            artifacts=artifacts,
+            iteration_count=iteration_count,
+            previous_feedback=previous_feedback
         )
 
         return [
@@ -368,6 +381,81 @@ class PromptBuilder:
             artifacts=artifacts,
             logs=logs,
             feedback=feedback
+        )
+
+        return [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content}
+        ]
+
+    def build_revision_prompt(
+        self,
+        step: Step,
+        artifacts: List[Dict[str, Any]],
+        revision_instructions: List[str],
+        weaknesses: List[str],
+        quality_score: float,
+        needs_revision: bool,
+        requirement_coverage: Optional[Dict[str, Any]],
+        available_artifacts: Dict[str, Any],
+        tool_list: List[str],
+        user_preferences: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, str]]:
+        """Builds the revision prompt for Executor to address Reviewer feedback."""
+        system_template = self.env.get_template("executor/prompts/executor_system.j2")
+        user_template = self.env.get_template("reviewer/prompts/revision_user.j2")
+
+        system_content = system_template.render()
+
+        # Convert Pydantic model to dict for Jinja2
+        step_dict = step.dict() if hasattr(step, 'dict') else step
+
+        user_content = user_template.render(
+            step_definition=step_dict,
+            artifacts=artifacts,
+            revision_instructions=revision_instructions,
+            weaknesses=weaknesses,
+            quality_score=quality_score,
+            needs_revision=needs_revision,
+            requirement_coverage=requirement_coverage,
+            available_artifacts=available_artifacts,
+            tool_list=tool_list,
+            user_preferences=user_preferences
+        )
+
+        return [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content}
+        ]
+
+    def build_feedback_parser_prompt(self, text_feedback: str) -> List[Dict[str, str]]:
+        """Builds the prompt for parsing raw text feedback."""
+        system_template = self.env.get_template("memory/learning/prompts/feedback_parser_system.j2")
+        user_template = self.env.get_template("memory/learning/prompts/feedback_parser_user.j2")
+
+        system_content = system_template.render()
+        user_content = user_template.render(text_feedback=text_feedback)
+
+        return [
+            {"role": "system", "content": system_content},
+            {"role": "user", "content": user_content}
+        ]
+
+    def build_feedback_correlator_prompt(
+        self,
+        text_feedback: str,
+        trace_summary: List[Dict[str, Any]],
+        decision_summary: List[Dict[str, Any]]
+    ) -> List[Dict[str, str]]:
+        """Builds the prompt for correlating feedback to execution steps/decisions."""
+        system_template = self.env.get_template("memory/learning/prompts/feedback_correlator_system.j2")
+        user_template = self.env.get_template("memory/learning/prompts/feedback_correlator_user.j2")
+
+        system_content = system_template.render()
+        user_content = user_template.render(
+            text_feedback=text_feedback,
+            trace_summary=trace_summary,
+            decision_summary=decision_summary
         )
 
         return [

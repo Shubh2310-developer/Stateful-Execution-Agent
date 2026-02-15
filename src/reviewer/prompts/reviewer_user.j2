@@ -4,21 +4,46 @@
 
 **PLAN EXECUTED**:
 {% for step in plan_steps %}
-- [{{ step.status }}] {{ step.step_id }}: {{ step.description }}
+- [{{ step.status }}] Step {{ step.order }}: {{ step.description }}
+  Success Criteria: {{ step.success_criteria or "Not specified" }}
 {% endfor %}
 
 **ARTIFACTS PRODUCED**:
+{% if artifacts %}
 {% for artifact in artifacts %}
-- ID: {{ artifact.id }}
-  Type: {{ artifact.type }}
-  URI: {{ artifact.uri }}
+- **Artifact ID**: {{ artifact.id }}
+  **Type**: {{ artifact.type }}
+  **URI**: {{ artifact.uri }}
+  **Size**: {{ artifact.size_bytes or "Unknown" }} bytes
+  **Created**: {{ artifact.created_at }}
+  {% if artifact.content_preview %}
+  **Content Preview**:
+  ```
+  {{ artifact.content_preview }}
+  ```
+  {% endif %}
 {% endfor %}
+{% else %}
+No artifacts were produced.
+{% endif %}
+
+{% if iteration_count and iteration_count > 0 %}
+**REVISION ITERATION**: {{ iteration_count }}
+{% if previous_feedback %}
+**PREVIOUS REVIEWER FEEDBACK**:
+{{ previous_feedback }}
+{% endif %}
+{% endif %}
 
 ---
 
-### INSTRUCTIONS
-1. Perform the end-to-end review required by your Operational Protocol.
-2. Evaluate if the collective output of all steps satisfies the original user request.
-3. Provide critical feedback on any missing components or quality issues.
+### REVIEW INSTRUCTIONS
+1. Execute the comprehensive review protocol defined in your system prompt
+2. Systematically evaluate each success criterion against the delivered artifacts
+3. Assess whether the collective output fully satisfies the original user request
+4. Determine if the work PASSES or needs REVISION
+5. If revision is needed, provide specific, actionable instructions
+
+**CRITICAL**: Your response must be a valid JSON object following the exact schema defined in your system prompt. Include detailed reasoning that shows your systematic evaluation process.
 
 Return ONLY the JSON object.

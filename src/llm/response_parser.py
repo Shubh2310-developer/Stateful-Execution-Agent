@@ -11,19 +11,26 @@ class ResponseParser:
     @staticmethod
     def _repair_json(text: str) -> str:
         """Attempts to repair common JSON malformations."""
-        # 1. Remove trailing commas before closing braces/brackets
+        # 1. Remove control characters that cause JSON parsing issues
+        text = re.sub(r'[\x00-\x1f\x7f-\x9f]', ' ', text)
+        
+        # 2. Remove trailing commas before closing braces/brackets
         text = re.sub(r",\s*([\}\]])", r"\1", text)
 
-        # 2. Replace single quotes with double quotes for keys
+        # 3. Replace single quotes with double quotes for keys
         text = re.sub(r"\'(\w+)\'\s*:", r'"\1":', text)
 
-        # 3. Replace single quotes with double quotes for string values
+        # 4. Replace single quotes with double quotes for string values
         # This is more careful to avoid breaking apostrophes inside already double-quoted strings
         # although this method is only called if initial parsing failed.
         text = re.sub(r":\s*\'(.*?)\'", r': "\1"', text)
 
-        # 4. Handle Python-style Booleans/None if the model outputted them
+        # 5. Handle Python-style Booleans/None if the model outputted them
         text = text.replace(": True", ": true").replace(": False", ": false").replace(": None", ": null")
+
+        # 6. Fix newlines and carriage returns in string values
+        text = re.sub(r'\n', '\\n', text)
+        text = re.sub(r'\r', '\\r', text)
 
         return text
 

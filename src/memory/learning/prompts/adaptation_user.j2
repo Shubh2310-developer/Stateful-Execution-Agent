@@ -1,28 +1,37 @@
 ### TASK EXECUTION SUMMARY
-**GOAL**: {{ goal }}
-**STATUS**: {{ status }}
+<goal>
+{{ goal }}
+</goal>
 
-**PLAN EXECUTED**:
+<status>
+{{ status }}
+</status>
+
+<plan_executed>
 {% for step in steps %}
 - [{{ step.status }}] {{ step.step_id }}: {{ step.description }} (Action: {{ step.action }})
 {% endfor %}
+</plan_executed>
 
-**ARTIFACTS PRODUCED**:
+<artifacts_produced>
 {% for artifact in artifacts %}
 - ID: {{ artifact.id }} | Type: {{ artifact.type }} | URI: {{ artifact.uri }}
 {% endfor %}
+</artifacts_produced>
 
 {% if logs %}
-**EXECUTION LOGS (TRUNCATED)**:
+<execution_logs>
 {% for log in logs %}
 - [{{ log.step_id }}] Action: {{ log.action }}
   Output: {{ log.output }}
 {% endfor %}
+</execution_logs>
 {% endif %}
 
 {% if feedback %}
-**USER FEEDBACK**:
+<user_feedback>
 {{ feedback | tojson(indent=2) }}
+</user_feedback>
 {% endif %}
 
 ---

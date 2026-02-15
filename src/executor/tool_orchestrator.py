@@ -15,9 +15,24 @@ class ToolOrchestrator:
         """
         logger.info(f"Invoking tool for action: {action}")
 
+        # Debug: Check what tools are available
+        available_tools = self.tool_selector.get_available_tool_names()
+        logger.debug(f"Available tools: {available_tools}")
+        
         tool = self.tool_selector.select_tool(action)
         if not tool:
-            logger.error(f"Tool not found: {action}")
+            logger.error(f"Tool not found: {action}. Available: {available_tools}")
+            
+            # Try direct registry access as fallback
+            from src.tools.tool_registry import tool_registry
+            direct_tool = tool_registry.get_tool(action)
+            if direct_tool:
+                logger.info(f"Found tool via direct registry access: {action}")
+                tool = direct_tool
+            else:
+                raise ToolError(f"No tool found for action: {action}. Available: {available_tools}")
+        
+        if not tool:
             raise ToolError(f"No tool found for action: {action}")
 
         # 1. Validate Input

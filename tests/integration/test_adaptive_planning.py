@@ -1,6 +1,6 @@
 import pytest
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock, patch
 from src.planner.planner import Planner
 from src.core.types import UserMemory, Plan, Step
@@ -23,7 +23,7 @@ async def test_adaptive_planning_integration():
                 "task_type": "data cleanup",
                 "approach": "Always use the 'summarizer' after 'web_search'.",
                 "feedback": "User preferred summarized results.",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(timezone.utc)
             }
         ],
         preferences={"format": "json"}

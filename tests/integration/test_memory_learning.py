@@ -3,7 +3,7 @@ import json
 from unittest.mock import AsyncMock, patch
 from src.memory.learning.adaptation_engine import AdaptationEngine
 from src.core.types import TaskState, Goal, TaskStatus
-from datetime import datetime
+from datetime import datetime, timezone
 
 @pytest.mark.asyncio
 async def test_memory_learning_from_completion():
@@ -36,7 +36,7 @@ async def test_memory_learning_from_completion():
         state = TaskState(
             task_id="t1", user_id="u1", status=TaskStatus.COMPLETED,
             goal=Goal(request="test learning", success_criteria=["criteria"]),
-            updated_at=datetime.utcnow()
+            updated_at=datetime.now(timezone.utc)
         )
 
         feedback = {"content": "Good job", "rating": 5}

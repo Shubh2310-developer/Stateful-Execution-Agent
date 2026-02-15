@@ -18,7 +18,7 @@ class TraceAggregator:
             {"$group": {
                 "_id": "$event_type",
                 "count": {"$sum": 1},
-                "avg_duration": {"$avg": "$metadata.duration_ms"}
+                "avg_duration": {"$avg": "$outcome.duration_ms"}
             }}
         ]
 

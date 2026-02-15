@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 SAMPLE_TASK_DATA = {
     "task_id": "task_test_001",
@@ -10,8 +10,8 @@ SAMPLE_TASK_DATA = {
         "success_criteria": ["Script exists", "Script runs", "Output is correct"]
     },
     "status": "pending",
-    "created_at": datetime.utcnow(),
-    "updated_at": datetime.utcnow()
+    "created_at": datetime.now(timezone.utc),
+    "updated_at": datetime.now(timezone.utc)
 }
 
 SAMPLE_TASK_LIST = [
@@ -22,7 +22,7 @@ SAMPLE_TASK_LIST = [
         "version_counter": 1,
         "goal": {"request": "Research climate change"},
         "status": "completed",
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow()
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc)
     }
 ]

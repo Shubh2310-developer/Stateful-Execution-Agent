@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 from src.reviewer.reviewer import Reviewer
 from src.core.types import TaskState, Artifact, Goal, TaskStatus
-from datetime import datetime
+from datetime import datetime, timezone
 
 @pytest.mark.asyncio
 async def test_reviewer_approved():
@@ -18,7 +18,7 @@ async def test_reviewer_approved():
             Artifact(
                 id="art1", task_id="t1", step_id="s1",
                 type="document", uri="file:///tmp/1.md",
-                created_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc)
             )
         ]
     )

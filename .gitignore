@@ -164,8 +164,24 @@ Thumbs.db
 artifacts/
 data/artifacts/
 logs/*.log
+logs/backend.log
 !logs/.gitkeep
 .planning/
 .env
 .env.*
+.env.bak
 !.env.example
+node_modules
+
+# Next.js
+.next/
+out/
+
+# SECURITY - API KEYS AND SECRETS
+*.key
+*.pem
+*secret*
+*password*
+*token*
+.claude/settings.local.json
+gsk_*

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, timezone
 from src.core.types import StepLog
 
 class TaskContext(BaseModel):
@@ -11,8 +11,8 @@ class TaskContext(BaseModel):
     step_logs: List[StepLog] = []
     working_variables: Dict[str, Any] = {}
     temporary_notes: List[str] = []
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     def add_step_log(self, step_id: str, action: str, description: str, output: Any = None):
         log = StepLog(
@@ -22,12 +22,12 @@ class TaskContext(BaseModel):
             output=output
         )
         self.step_logs.append(log)
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
 
     def update_variable(self, key: str, value: Any):
         self.working_variables[key] = value
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
 
     def add_note(self, note: str):
         self.temporary_notes.append(note)
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)

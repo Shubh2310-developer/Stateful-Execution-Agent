@@ -1,11 +1,13 @@
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import IndexModel, ASCENDING, DESCENDING
 from src.core.config import settings
 from src.state.state_schema import TaskStateSchema
 from src.core.types import Artifact
 from src.utils.logger import logger
+from src.cache.redis_cache import cache_manager
+import time
 
 class DatabaseAdapter:
     """Adapter for persisting task state, versions, and artifacts to MongoDB."""
@@ -18,6 +20,8 @@ class DatabaseAdapter:
         self.tasks = self.db.tasks
         self.versions = self.db.task_versions
         self.artifacts = self.db.artifacts
+        self.traces = self.db.trace
+        self.decisions = self.db.decisions
 
     async def setup_indexes(self):
         """Initialize indexes for performance and data integrity."""
@@ -39,6 +43,23 @@ class DatabaseAdapter:
             # Artifact indexes
             await self.artifacts.create_index([("artifact_id", ASCENDING)], unique=True)
             await self.artifacts.create_index([("task_id", ASCENDING)])
+
+            # Trace indexes
+            await self.traces.create_index([("task_id", ASCENDING), ("timestamp", ASCENDING)])
+            await self.traces.create_index([("tags", ASCENDING)])
+            # TTL for traces (30 days)
+            await self.traces.create_index([("timestamp", ASCENDING)], expireAfterSeconds=2592000)
+
+            # Decision indexes
+            # Primary query: Get all decisions for task X, sorted by step/time
+            await self.decisions.create_index([("task_id", ASCENDING), ("step_id", ASCENDING), ("timestamp", ASCENDING)])
+            # Analytics: Low confidence
+            await self.decisions.create_index([("confidence_score", ASCENDING)])
+            # Filtering by tag
+            await self.decisions.create_index([("tags", ASCENDING)])
+            # TTL for decisions (30 days)
+            await self.decisions.create_index([("timestamp", ASCENDING)], expireAfterSeconds=2592000)
+
             logger.info("Database indexes created successfully")
         except Exception as e:
             logger.error(f"Failed to setup indexes: {str(e)}")
@@ -55,8 +76,8 @@ class DatabaseAdapter:
             async with await self.client.start_session() as session:
                 async with session.start_transaction():
                     # 1. Update current state and increment version
-                    state_dict = state.dict()
-                    state_dict["updated_at"] = datetime.utcnow()
+                    state_dict = state.model_dump()
+                    state_dict["updated_at"] = datetime.now(timezone.utc)
 
                     # Exclude version_counter from $set to avoid conflict with $inc
                     if "version_counter" in state_dict:
@@ -81,9 +102,16 @@ class DatabaseAdapter:
                             "snapshot": state_dict,
                             "event_type": "milestone",
                             "summary": summary or "State snapshot at milestone",
-                            "created_at": datetime.utcnow()
+                            "created_at": datetime.now(timezone.utc)
                         }
                         await self.versions.insert_one(version_doc, session=session)
+
+            # Invalidate cache after successful save
+            try:
+                await cache_manager.invalidate_task(state.task_id)
+            except Exception as e:
+                logger.warning(f"Failed to invalidate cache for task {state.task_id}: {str(e)}")
+
             return True
         except Exception as e:
             # Handle cases where transactions might not be supported (e.g. standalone Mongo)
@@ -97,8 +125,8 @@ class DatabaseAdapter:
     async def _save_state_sequential(self, state: TaskStateSchema, is_milestone: bool, summary: Optional[str]) -> bool:
         """Fallback for environments without transaction support."""
         try:
-            state_dict = state.dict()
-            state_dict["updated_at"] = datetime.utcnow()
+            state_dict = state.model_dump()
+            state_dict["updated_at"] = datetime.now(timezone.utc)
 
             # Exclude version_counter from $set to avoid conflict with $inc
             if "version_counter" in state_dict:
@@ -121,20 +149,59 @@ class DatabaseAdapter:
                     "snapshot": state_dict,
                     "event_type": "milestone",
                     "summary": summary or "State snapshot at milestone",
-                    "created_at": datetime.utcnow()
+                    "created_at": datetime.now(timezone.utc)
                 }
                 await self.versions.insert_one(version_doc)
+
+            # Invalidate cache after successful save
+            try:
+                await cache_manager.invalidate_task(state.task_id)
+            except Exception as e:
+                logger.warning(f"Failed to invalidate cache for task {state.task_id}: {str(e)}")
+
             return True
         except Exception as e:
             logger.error(f"Sequential save failed: {str(e)}")
             return False
 
     async def load_state(self, task_id: str) -> Optional[TaskStateSchema]:
-        logger.debug(f"Loading state for task {task_id} from database")
+        logger.debug(f"Loading state for task {task_id}")
+
+        # Try cache first
+        cache_key = f"{cache_manager.PREFIX_TASK_STATE}{task_id}"
+        start_time = time.time()
+
+        try:
+            cached_data = await cache_manager.get(cache_key)
+            if cached_data:
+                query_time = (time.time() - start_time) * 1000
+                logger.debug(f"Cache HIT for task state {task_id} ({query_time:.2f}ms)")
+                # Reconstruct TaskStateSchema from cached dict
+                return TaskStateSchema(**cached_data)
+        except Exception as e:
+            logger.warning(f"Cache error for task {task_id}: {str(e)}")
+
+        # Cache miss - query database
+        start_time = time.time()
         try:
             doc = await self.tasks.find_one({"task_id": task_id})
+            query_time = (time.time() - start_time) * 1000
+            logger.debug(f"Database query for task state {task_id} ({query_time:.2f}ms)")
+
             if doc:
-                return TaskStateSchema(**doc)
+                state = TaskStateSchema(**doc)
+
+                # Cache the result with timestamp
+                try:
+                    await cache_manager.set(
+                        cache_key,
+                        state.model_dump(),
+                        last_modified=state.updated_at
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to cache task state {task_id}: {str(e)}")
+
+                return state
             return None
         except Exception as e:
             logger.error(f"Failed to load state from database: {str(e)}")
@@ -154,9 +221,16 @@ class DatabaseAdapter:
         try:
             await self.artifacts.update_one(
                 {"id": artifact.id},
-                {"$set": artifact.dict()},
+                {"$set": artifact.model_dump()},
                 upsert=True
             )
+
+            # Invalidate artifacts cache for this task
+            try:
+                await cache_manager.delete(f"{cache_manager.PREFIX_TASK_ARTIFACTS}{artifact.task_id}")
+            except Exception as e:
+                logger.warning(f"Failed to invalidate artifacts cache: {str(e)}")
+
             return True
         except Exception as e:
             logger.error(f"Failed to register artifact: {str(e)}")
@@ -164,10 +238,42 @@ class DatabaseAdapter:
 
     async def get_artifacts(self, task_id: str) -> List[Artifact]:
         """Retrieves all artifacts for a task."""
+        logger.debug(f"Getting artifacts for task {task_id}")
+
+        # Try cache first
+        cache_key = f"{cache_manager.PREFIX_TASK_ARTIFACTS}{task_id}"
+        start_time = time.time()
+
+        try:
+            cached_data = await cache_manager.get(cache_key)
+            if cached_data:
+                query_time = (time.time() - start_time) * 1000
+                logger.debug(f"Cache HIT for task artifacts {task_id} ({query_time:.2f}ms)")
+                # Reconstruct Artifact objects from cached list
+                return [Artifact(**item) for item in cached_data]
+        except Exception as e:
+            logger.warning(f"Cache error for artifacts {task_id}: {str(e)}")
+
+        # Cache miss - query database
+        start_time = time.time()
         try:
             cursor = self.artifacts.find({"task_id": task_id})
             results = await cursor.to_list(length=100)
-            return [Artifact(**doc) for doc in results]
+            query_time = (time.time() - start_time) * 1000
+            logger.debug(f"Database query for task artifacts {task_id} ({query_time:.2f}ms)")
+
+            artifacts = [Artifact(**doc) for doc in results]
+
+            # Cache the results
+            try:
+                await cache_manager.set(
+                    cache_key,
+                    [art.model_dump() for art in artifacts]
+                )
+            except Exception as e:
+                logger.warning(f"Failed to cache artifacts for {task_id}: {str(e)}")
+
+            return artifacts
         except Exception as e:
             logger.error(f"Failed to retrieve artifacts: {str(e)}")
             return []

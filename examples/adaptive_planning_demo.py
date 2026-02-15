@@ -1,6 +1,6 @@
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any
 
 from src.planner.planner import Planner
@@ -21,13 +21,13 @@ async def demo_adaptive_planning():
                 "task_type": "revenue analysis",
                 "approach": "Used web_search to find competitor data first, then used data_processor.",
                 "feedback": "The user liked the competitor comparison.",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(timezone.utc)
             },
             {
                 "task_type": "market research",
                 "approach": "Summarized findings using the summarizer tool before final report.",
                 "feedback": "Effective for long documents.",
-                "timestamp": datetime.utcnow()
+                "timestamp": datetime.now(timezone.utc)
             }
         ]
     )

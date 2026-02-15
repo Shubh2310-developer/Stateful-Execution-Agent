@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Base Colors (Light Mode) */
+    --color-bg-base: #F8FAFC;    /* Base workspace */
+    --color-bg-well: #F1F5F9;    /* Recessed areas */
+    --color-bg-surface: #FFFFFF; /* Main cards/panels */
+    --color-bg-muted: #F1F5F9;   /* Hover/Muted */
+    --color-bg-dark: #0F172A;    /* Contrast background */
+
+    --color-text-primary: #1E293B;
+    --color-text-secondary: #475569;
+    --color-text-muted: #94A3B8;
+    --color-text-on-dark: #F8FAFC;
+
+    --color-brand-primary: #3B82F6;
+    --color-brand-cta: #F97316;
+
+    --color-status-success: #10B981;
+    --color-status-warning: #F59E0B;
+    --color-status-error: #EF4444;
+    --color-status-info: #6366F1;
+
+    /* Spacing & Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+
+  .dark {
+    /* Surface Colors (Dark Mode - Slate Scale) */
+    --color-bg-well: #020617;    /* Level 0: Slate-950 (Workspace well) */
+    --color-bg-base: #0F172A;    /* Level 1: Slate-900 (App/Header) */
+    --color-bg-surface: #1E293B; /* Level 2: Slate-800 (Content/Cards) */
+    --color-bg-muted: #334155;   /* Level 3: Slate-700 (Interactive/Hover) */
+    --color-bg-dark: #020617;    /* Deep contrast */
+
+    /* Text Colors (Dark Mode) */
+    --color-text-primary: #F8FAFC;   /* Slate-50 */
+    --color-text-secondary: #CBD5E1; /* Slate-300 */
+    --color-text-muted: #94A3B8;     /* Slate-400 */
+
+    /* Adjusted Status Colors (Vibrant Dark) */
+    --color-status-success: #34D399; /* Emerald-400 */
+    --color-status-warning: #FBBF24; /* Amber-400 */
+    --color-status-error: #F87171;   /* Red-400 */
+    --color-status-info: #818CF8;    /* Indigo-400 */
+  }
+
+  body {
+    @apply bg-[var(--color-bg-base)] text-[var(--color-text-primary)] font-sans antialiased;
+  }
+
+  body *::selection {
+    background-color: rgba(59, 130, 246, 0.3); /* Fallback to brand-primary with 30% opacity */
+    background-color: color-mix(in srgb, var(--color-brand-primary), transparent 70%);
+  }
+
+  /* Accessibility: Global Focus States */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-primary ring-offset-2 ring-offset-[var(--color-bg-base)];
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight text-text-primary;
+  }
+
+  code, pre {
+    @apply font-mono text-sm;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-slate-900/80 backdrop-blur-md border border-white/10;
+  }
+
+  .card-base {
+    @apply bg-[var(--color-bg-surface)] border border-slate-200 dark:border-slate-800 rounded-lg transition-all duration-200 shadow-sm;
+  }
+
+  .interactive-element {
+    @apply min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-[var(--color-brand-primary)] text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 active:scale-95 transition-all shadow-md shadow-brand-primary/20;
+  }
+
+  .trace-panel {
+    @apply w-[400px] border-l border-slate-200 dark:border-slate-800 bg-[var(--color-bg-surface)];
+  }
+
+  .status-pill {
+    @apply px-2 py-0.5 rounded-full text-xs font-medium border;
+  }
+}

@@ -1,7 +1,13 @@
-### REFLECTION CONTEXT: {{ goal }}
-**FINAL STATUS**: {{ status }}
+### REFLECTION CONTEXT
+<goal>
+{{ goal }}
+</goal>
 
-#### EXECUTION TRACE:
+<final_status>
+{{ status }}
+</final_status>
+
+<execution_trace>
 {% for log in logs %}
 [Step: {{ log.step_id }}]
 Action: {{ log.action }}
@@ -9,15 +15,18 @@ Description: {{ log.description }}
 Output Snippet: {{ log.output }}
 ---
 {% endfor %}
+</execution_trace>
 
-#### ARTIFACTS PRODUCED:
+<artifacts_produced>
 {% for artifact in artifacts %}
 - {{ artifact.type }} (ID: {{ artifact.id }}): {{ artifact.uri }}
 {% endfor %}
+</artifacts_produced>
 
 {% if feedback %}
-#### USER FEEDBACK:
+<user_feedback>
 {{ feedback | tojson(indent=2) }}
+</user_feedback>
 {% endif %}
 
 ---
@@ -29,4 +38,3 @@ Perform a deep reflection on this task.
 3. Identify **Corrections**: What mistakes were made, and how should we adjust our tools or planning to avoid them?
 
 Generate the JSON reflection summary according to the system instructions.
-Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>

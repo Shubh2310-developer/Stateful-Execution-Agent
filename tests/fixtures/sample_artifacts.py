@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from src.core.types import Artifact
 
 SAMPLE_ARTIFACT_1 = Artifact(
@@ -11,7 +11,7 @@ SAMPLE_ARTIFACT_1 = Artifact(
     size_bytes=1024,
     mime_type="application/json",
     metadata={"source": "test_fixture", "format": "json"},
-    created_at=datetime.utcnow()
+    created_at=datetime.now(timezone.utc)
 )
 
 SAMPLE_ARTIFACT_2 = Artifact(
@@ -24,5 +24,5 @@ SAMPLE_ARTIFACT_2 = Artifact(
     size_bytes=42,
     mime_type="text/x-python",
     metadata={"lang": "python", "format": "txt"},
-    created_at=datetime.utcnow()
+    created_at=datetime.now(timezone.utc)
 )

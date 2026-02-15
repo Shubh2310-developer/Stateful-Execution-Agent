@@ -1,5 +1,4 @@
 from typing import Any, Dict, List
-import httpx
 from src.tools.base import BaseTool, ToolMetadata
 from src.utils.logger import logger
 
@@ -10,16 +9,21 @@ class WebSearchTool(BaseTool):
     def metadata(self) -> ToolMetadata:
         return ToolMetadata(
             name="web_search",
-            description="Search the web for current information and news.",
+            description=(
+                "Searches the internet for current information, facts, and resources. "
+                "USE THIS TOOL FOR: Finding information online, researching topics, looking up facts, getting current data. "
+                "DO NOT USE FOR: Creating content, writing code, performing calculations. "
+                "RETURNS: List of search results with titles, URLs, and snippets."
+            ),
             parameters={
                 "type": "object",
                 "properties": {
-                    "query": {"type": "string", "description": "The search query"},
-                    "max_results": {"type": "integer", "description": "Maximum number of results to return", "default": 5}
+                    "query": {"type": "string", "description": "The search query or keywords to search for"},
+                    "max_results": {"type": "integer", "description": "Maximum number of results to return (1-10)", "default": 5}
                 },
                 "required": ["query"]
             },
-            returns={"type": "array", "items": {"type": "object"}, "description": "List of search results"}
+            returns={"type": "array", "items": {"type": "object"}, "description": "List of search results with title, url, and snippet"}
         )
 
     async def execute(self, query: str, max_results: int = 5, **kwargs) -> List[Dict[str, Any]]:

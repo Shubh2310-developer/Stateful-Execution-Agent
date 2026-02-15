@@ -120,5 +120,15 @@ class GroqClient:
             logger.error(f"Error in Groq stream: {str(e)}")
             raise LLMError(f"Stream interrupted: {str(e)}")
 
-# Global instance
+# Global instance - will be initialized lazily
+_groq_client_instance = None
+
+def get_groq_client() -> GroqClient:
+    """Get or create the global Groq client instance."""
+    global _groq_client_instance
+    if _groq_client_instance is None:
+        _groq_client_instance = GroqClient()
+    return _groq_client_instance
+
+# For backward compatibility
 groq_client = GroqClient()

@@ -5,8 +5,25 @@ from src.core.config import settings
 class ModelSelector:
     @staticmethod
     def get_model(task_type: Optional[str] = None) -> str:
-        # For now, return the default model or one from settings
-        # Could be expanded to select cheaper models for simple tasks
+        """
+        Selects the appropriate model based on task complexity.
+
+        Routing Strategy:
+        - planning, review: Premium model (llama-3.3-70b-versatile)
+        - extraction, quality_check, tool_params: Balanced model (mixtral-8x7b-32768)
+        - summary, simple_task: Efficient model (llama3-8b-8192)
+        """
+        if not task_type:
+            return settings.llm.model or DEFAULT_MODEL
+
+        # Task-based routing
+        if task_type in ["planning", "review", "complex_reasoning"]:
+            return "llama-3.3-70b-versatile"
+        elif task_type in ["extraction", "quality_check", "tool_params", "validation"]:
+            return "mixtral-8x7b-32768"
+        elif task_type in ["summary", "simple_task", "translation"]:
+            return "llama3-8b-8192"
+
         return settings.llm.model or DEFAULT_MODEL
 
     @staticmethod

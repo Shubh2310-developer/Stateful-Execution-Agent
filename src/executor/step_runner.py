@@ -8,7 +8,7 @@ from src.llm.response_parser import ResponseParser
 from src.memory.retrieval.context_builder import ContextBuilder
 from src.memory.short_term.working_memory import WorkingMemory
 from src.utils.logger import logger
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 class StepRunner:
@@ -61,7 +61,7 @@ class StepRunner:
         final_tool_output = None
         final_validation_result = None
         decisions = []
-        start_execution_time = datetime.utcnow()
+        start_execution_time = datetime.now(timezone.utc)
 
         while attempt < max_retries:
             attempt += 1
@@ -113,7 +113,7 @@ class StepRunner:
                 decision_id=f"dec_{uuid4().hex[:8]}",
                 task_id=task_id,
                 step_id=step_id,
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(timezone.utc),
                 decision_point=f"Execution Attempt {attempt}",
                 reasoning=reasoning,
                 choice_made=action,
@@ -145,7 +145,7 @@ class StepRunner:
                     user_preferences=getattr(user_memory, 'preferences', None) if user_memory else None
                 )
 
-        end_execution_time = datetime.utcnow()
+        end_execution_time = datetime.now(timezone.utc)
 
         # 5. Create Final Artifact
         artifact = await self.artifact_manager.create_artifact(

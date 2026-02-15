@@ -107,8 +107,13 @@ class DocumentSearchTool(BaseTool):
         matches = []
         query_lower = query.lower()
 
-        # Search in AGENT_STORAGE__LOCAL_ROOT
-        search_paths = [self.local_root, os.getcwd()]
+        # ONLY search in local_root for security
+        search_paths = [self.local_root]
+
+        # Basic sanitization for path_filter
+        if ".." in path_filter or path_filter.startswith(("/", "\\")):
+            logger.warning(f"Potentially dangerous path_filter blocked: {path_filter}")
+            path_filter = "*"
 
         for base_path in search_paths:
             if not os.path.exists(base_path):

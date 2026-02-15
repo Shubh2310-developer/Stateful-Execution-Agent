@@ -6,8 +6,10 @@ from src.planner.step_generator import StepGenerator
 from src.planner.dependency_analyzer import DependencyAnalyzer
 from src.planner.plan_validator import PlanValidator
 from src.planner.adaptive_planner import AdaptivePlanner
+from src.trace.trace_logger import trace_logger
+from src.trace.decision_recorder import decision_recorder
 from src.utils.logger import logger
-from datetime import datetime
+from datetime import datetime, timezone
 
 class Planner:
     """Orchestrates the decomposition of goals into validated execution plans."""
@@ -32,9 +34,24 @@ class Planner:
         Includes a retry loop for self-correction if validation fails.
         """
         logger.info(f"Creating plan for goal: {raw_goal[:50]}...")
+        
+        task_id = context.get("task_id") if context else f"task_{uuid4().hex[:8]}"
+        
+        # Log planning decision
+        await trace_logger.log_event(
+            event_type="planner_invoked",
+            context={"goal": raw_goal, "tools_available": len(available_tools)},
+            task_id=task_id
+        )
 
         # 1. Parse and refine the goal
         parsed_goal_data = await self.goal_parser.parse(raw_goal, context)
+        
+        await trace_logger.log_event(
+            event_type="goal_parsed",
+            context={"parsed_goal": parsed_goal_data},
+            task_id=task_id
+        )
 
         # 1.5 Prepare adaptive context from memory
         adaptive_context = await self.adaptive_planner.prepare_adaptive_context(
@@ -68,12 +85,11 @@ class Planner:
                 continue
 
             # 4. Create Plan object
-            task_id = context.get("task_id") if context else f"task_{uuid4().hex[:8]}"
             plan = Plan(
                 task_id=task_id,
                 steps=sorted_steps,
-                created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc),
+                updated_at=datetime.now(timezone.utc)
             )
 
             # 5. Semantic Validation via LLM
@@ -81,6 +97,16 @@ class Planner:
 
             if audit_result.get("isValid"):
                 logger.info(f"Plan created and validated successfully: {task_id}")
+                
+                await decision_recorder.record_decision(
+                    decision_point="plan_validation",
+                    rationale=audit_result.get("feedback", "Plan meets all requirements"),
+                    final_choice="plan_approved",
+                    task_id=task_id,
+                    confidence_score=1.0,
+                    metadata={"step_count": len(sorted_steps), "attempt": attempts}
+                )
+                
                 return plan
             else:
                 last_feedback = audit_result.get("feedback", "Unknown validation error")

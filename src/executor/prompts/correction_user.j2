@@ -1,34 +1,36 @@
 ### CORRECTION CONTEXT
 The previous execution of the following step **FAILED** verification.
 
-**STEP**:
+<failed_step>
 {{ step_definition | tojson(indent=2) }}
+</failed_step>
 
-**PREVIOUS TOOL CALLED**:
-{{ previous_action }}
+<previous_attempt>
+- **Tool**: {{ previous_action }}
+- **Parameters**: {{ previous_params | tojson(indent=2) }}
+- **Output**: {{ previous_output | tojson(indent=2) }}
+</previous_attempt>
 
-**PREVIOUS PARAMETERS**:
-{{ previous_params | tojson(indent=2) }}
-
-**OBSERVED OUTPUT**:
-{{ previous_output | tojson(indent=2) }}
-
-**VERIFICATION ISSUES**:
+<verification_issues>
 {% for issue in issues %}
 - {{ issue }}
 {% endfor %}
+</verification_issues>
 
-**AVAILABLE ARTIFACTS**:
+<available_artifacts>
 {{ available_artifacts | tojson(indent=2) }}
+</available_artifacts>
 
-**TOOLS AVAILABLE**:
+<tools_available>
 {% for tool in tool_list %}
 - {{ tool }}
 {% endfor %}
+</tools_available>
 
 {% if user_preferences %}
-**USER PREFERENCES**:
+<user_preferences>
 {{ user_preferences | tojson(indent=2) }}
+</user_preferences>
 {% endif %}
 
 ---

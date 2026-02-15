@@ -113,6 +113,16 @@ class UserPreferences(BaseModel):
     formatting_rules: Dict[str, Any] = Field(default_factory=dict)
 
 
+class PreferenceUpdate(BaseModel):
+    """Represents a proposed update to user preferences based on feedback."""
+    field: str
+    old_value: Any
+    new_value: Any
+    confidence: float = Field(ge=0.0, le=1.0)
+    reasoning: str
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
 class HistoricalPattern(BaseModel):
     """Structured record of a past task for semantic retrieval."""
     user_id: str
@@ -134,3 +144,25 @@ class UserMemory(BaseModel):
     preferences: UserPreferences
     domain_knowledge: Dict[str, Any] = Field(default_factory=dict)
     last_updated: datetime = Field(default_factory=datetime.utcnow)
+
+
+class UserFeedback(BaseModel):
+    """Represents raw feedback received from a user."""
+    feedback_id: str
+    task_id: str
+    user_id: str
+    rating: int = Field(ge=1, le=5)
+    text_feedback: Optional[str] = None
+    sentiment: str = "neutral"
+    categories: List[str] = Field(default_factory=list)
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+
+class FeedbackInsight(BaseModel):
+    """Actionable insight derived from feedback analysis."""
+    insight: str
+    confidence: float = Field(ge=0.0, le=1.0)
+    action: str
+    category: str
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime = Field(default_factory=datetime.utcnow)

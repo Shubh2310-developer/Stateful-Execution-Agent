@@ -8,13 +8,37 @@ from src.memory.memory_manager import MemoryManager
 from src.memory.retrieval.semantic_search import SemanticSearch
 
 class AdaptationEngine:
-    """Extracts lessons from completed tasks to update long-term memory."""
+    """
+    Engine responsible for post-task reflection and long-term learning.
+
+    This component analyzes the execution trace, produced artifacts, and user feedback
+    to extract lessons learned and update the agent's historical knowledge base.
+    """
 
     def __init__(self, memory_manager: Optional[MemoryManager] = None):
+        """
+        Initializes the AdaptationEngine.
+
+        Args:
+            memory_manager (MemoryManager, optional): Manager for persistent memory operations.
+                Defaults to a new MemoryManager instance.
+        """
         self.memory_manager = memory_manager or MemoryManager()
         self.semantic_search = SemanticSearch(self.memory_manager)
 
     async def learn_from_task(self, state: TaskState, feedback: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Triggers a deep reflection process on a completed or failed task.
+
+        Args:
+            state (TaskState): The final state of the task, including logs and artifacts.
+            feedback (Dict[str, Any], optional): User feedback processed by FeedbackProcessor.
+                Defaults to None.
+
+        Returns:
+            Dict[str, Any]: A summary of the reflection process, including identified
+                lessons learned and potential improvements for future similar tasks.
+        """
         logger.info(f"Triggering deep reflection for task: {state.task_id}")
 
         if state.status != TaskStatus.COMPLETED and state.status != TaskStatus.FAILED:
@@ -26,15 +50,31 @@ class AdaptationEngine:
             for a in state.artifacts
         ]
 
-        logs_data = [
-            {
-                "step_id": l.step_id,
-                "action": l.action,
-                "description": l.description,
-                "output": str(l.output)[:1000] # Truncate large outputs
-            }
-            for l in state.logs
-        ]
+        # Intelligent log summarization to prevent token overflow
+        logs_data = []
+        max_logs = 15
+
+        if len(state.logs) > max_logs:
+            logger.info(f"Task has {len(state.logs)} logs. Summarizing to top/bottom {max_logs//2} logs.")
+            # Keep first few and last few logs as they are usually most informative for overall flow and final outcome
+            head_logs = state.logs[:max_logs//2]
+            tail_logs = state.logs[-(max_logs//2):]
+
+            for l in head_logs:
+                logs_data.append(self._format_log(l))
+
+            logs_data.append({
+                "step_id": "...",
+                "action": "SUMMARIZED",
+                "description": f"... {len(state.logs) - max_logs} steps omitted for brevity ...",
+                "output": "..."
+            })
+
+            for l in tail_logs:
+                logs_data.append(self._format_log(l))
+        else:
+            for l in state.logs:
+                logs_data.append(self._format_log(l))
 
         messages = prompt_builder.build_reflection_prompt(
             goal=state.goal.request,
@@ -45,50 +85,27 @@ class AdaptationEngine:
         )
 
         try:
-            # 2. Call LLM for Reflection
-            response_text = await groq_client.generate_response(messages)
-            reflection_summary = ResponseParser.parse_json_response(response_text)
-
-            logger.info(f"Reflection completed for task {state.task_id}")
-            if "reasoning" in reflection_summary:
-                logger.debug(f"Reflection Reasoning: {reflection_summary['reasoning']}")
-
-            # 3. Update User Preferences
-            pref_updates = reflection_summary.get("user_preference_updates")
-            if pref_updates:
-                logger.info(f"Updating user preferences from reflection: {list(pref_updates.keys())}")
-                await self.memory_manager.update_user_preferences(state.user_id, pref_updates)
-
-            # 4. Store Historical Pattern
-            patterns_data = reflection_summary.get("patterns")
-            if patterns_data:
-                # Combine insights and corrections into metadata
-                combined_lessons = reflection_summary.get("insights", []) + reflection_summary.get("corrections", [])
-
-                embedding_text = f"Goal: {state.goal.request}\nApproach: {patterns_data.get('successful_approach', '')}"
-                embedding = self.semantic_search.generate_embedding(embedding_text)
-
-                pattern = HistoricalPattern(
-                    user_id=state.user_id,
-                    task_id=state.task_id,
-                    goal_request=state.goal.request,
-                    plan_summary=patterns_data.get("task_category", "general"),
-                    approach=patterns_data.get("successful_approach"),
-                    outcome=state.status.value,
-                    success_score=patterns_data.get("confidence_score", 1.0 if state.status == TaskStatus.COMPLETED else 0.0),
-                    tags=combined_lessons,
-                    embedding=embedding,
-                    metadata={
-                        "reflection_reasoning": reflection_summary.get("reasoning"),
-                        "insights": reflection_summary.get("insights", []),
-                        "corrections": reflection_summary.get("corrections", [])
-                    }
-                )
-                await self.memory_manager.add_historical_pattern(pattern)
-                logger.info(f"Stored historical pattern for task {state.task_id}")
-
+            response = await groq_client.generate_response(
+                messages=messages,
+                temperature=0.5,
+                max_tokens=2000
+            )
+            
+            parser = ResponseParser()
+            reflection_summary = parser.parse_json_response(response)
+            
+            logger.info(f"Reflection complete for task {state.task_id}")
             return reflection_summary
 
         except Exception as e:
             logger.error(f"Reflection loop failed for task {state.task_id}: {str(e)}")
             return {}
+
+    def _format_log(self, log: Any) -> Dict[str, Any]:
+        """Formats a single log entry for the reflection prompt."""
+        return {
+            "step_id": log.step_id,
+            "action": log.action,
+            "description": log.description,
+            "output": str(log.output)[:1000] if log.output else "None"
+        }

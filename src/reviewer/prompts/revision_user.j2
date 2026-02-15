@@ -1,0 +1,99 @@
+### REVISION REQUEST
+The Reviewer has identified quality issues with the previous execution. You must now revise your work to address the specific feedback provided.
+
+---
+
+### ORIGINAL STEP
+<original_step>
+{{ step_definition | tojson(indent=2) }}
+</original_step>
+
+---
+
+### PREVIOUS EXECUTION
+<previous_execution>
+**Tools Used**:
+{% for artifact in artifacts %}
+- Artifact {{ artifact.id }}: {{ artifact.type }}
+{% endfor %}
+
+**Artifacts Produced**:
+{% for artifact in artifacts %}
+- **ID**: {{ artifact.id }}
+  **Type**: {{ artifact.type }}
+  **URI**: {{ artifact.uri }}
+  {% if artifact.content_preview %}
+  **Content Preview**:
+  ```
+  {{ artifact.content_preview }}
+  ```
+  {% endif %}
+{% endfor %}
+</previous_execution>
+
+---
+
+### REVIEWER FEEDBACK
+<reviewer_feedback>
+**Quality Score**: {{ quality_score }}/100
+**Overall Assessment**: {{ "FAILED REVIEW" if needs_revision else "PASSED" }}
+
+**Specific Issues Identified**:
+{% for instruction in revision_instructions %}
+- {{ instruction }}
+{% endfor %}
+
+**Weaknesses**:
+{% for weakness in weaknesses %}
+- {{ weakness }}
+{% endfor %}
+
+{% if requirement_coverage %}
+**Requirement Coverage**: {{ requirement_coverage.coverage_percentage }}%
+- Total Requirements: {{ requirement_coverage.total_requirements }}
+- Met: {{ requirement_coverage.met_requirements }}
+- Unmet: {{ requirement_coverage.unmet_requirements }}
+{% endif %}
+</reviewer_feedback>
+
+---
+
+### AVAILABLE CONTEXT
+<available_artifacts>
+{{ available_artifacts | tojson(indent=2) }}
+</available_artifacts>
+
+<available_tools>
+{% for tool in tool_list %}
+- {{ tool }}
+{% endfor %}
+</available_tools>
+
+{% if user_preferences %}
+<user_preferences>
+{{ user_preferences | tojson(indent=2) }}
+</user_preferences>
+{% endif %}
+
+---
+
+### REVISION INSTRUCTIONS
+1. **Carefully read** all revision instructions from the Reviewer
+2. **Analyze** what went wrong in the previous execution
+3. **Formulate a new approach** that directly addresses each identified issue
+4. **Select the appropriate tool** and parameters to fix the problems
+5. **Ensure** the revised output meets all success criteria
+
+**CRITICAL REQUIREMENTS FOR REVISION**:
+- Address EVERY issue listed in the revision instructions
+- Improve quality score to at least 70/100 (preferably 80+)
+- Maintain or enhance any strengths from the previous version
+- Meet all unmet requirements identified by the Reviewer
+- Preserve professional standards throughout
+
+Your `reasoning` field must explicitly explain:
+1. What specific issues you are addressing
+2. How your new approach fixes each problem
+3. Why you expect this revision to pass review
+
+Generate the revised execution JSON now. Return ONLY the JSON object with your tool call.

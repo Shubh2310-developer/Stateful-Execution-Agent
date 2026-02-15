@@ -6,7 +6,7 @@ import hashlib
 import json
 import mimetypes
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional, Union
 
 from src.storage.local_storage import LocalStorage
@@ -69,7 +69,7 @@ class ArtifactStore:
         return {
             "uri": uri,
             **metadata,
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(timezone.utc),
         }
 
     def retrieve_artifact(

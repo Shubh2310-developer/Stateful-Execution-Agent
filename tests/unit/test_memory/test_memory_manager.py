@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 from src.memory.memory_manager import MemoryManager
 from src.core.types import UserMemory
-from datetime import datetime
+from datetime import datetime, timezone
 
 @pytest.mark.asyncio
 async def test_get_user_memory():
@@ -14,7 +14,7 @@ async def test_get_user_memory():
             "user_id": "u1",
             "profile": {"name": "Test"},
             "preferences": {"tone": "concise"},
-            "last_updated": datetime.utcnow()
+            "last_updated": datetime.now(timezone.utc)
         }
         mock_collection.find_one = AsyncMock(return_value=memory_data)
 

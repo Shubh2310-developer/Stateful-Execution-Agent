@@ -1,25 +1,30 @@
 ### INPUT CONTEXT
-**PRIMARY GOAL**: {{ goal }}
+<goal>
+{{ goal }}
+</goal>
 
-**AVAILABLE TOOLS (Registry)**:
+<available_tools>
 {% for tool in tool_list %}
 - {{ tool }}
 {% endfor %}
+</available_tools>
 
 {% if user_preferences %}
-**USER PREFERENCES**:
+<user_preferences>
 {{ user_preferences | tojson(indent=2) }}
+</user_preferences>
 {% endif %}
 
 {% if constraints %}
-**GOAL CONSTRAINTS**:
+<goal_constraints>
 {% for constraint in constraints %}
 - {{ constraint }}
 {% endfor %}
+</goal_constraints>
 {% endif %}
 
 {% if lessons_learned or past_experiences %}
-**PAST EXPERIENCES & LESSONS LEARNED**:
+<past_experiences_and_lessons>
 {% if past_experiences %}
 {% for experience in past_experiences %}
 - {{ experience }}
@@ -30,11 +35,13 @@
 - {{ lesson }}
 {% endfor %}
 {% endif %}
+</past_experiences_and_lessons>
 {% endif %}
 
 {% if feedback %}
-**PREVIOUS ATTEMPT FEEDBACK (Self-Correction)**:
+<previous_attempt_feedback>
 {{ feedback }}
+</previous_attempt_feedback>
 {% endif %}
 
 ---

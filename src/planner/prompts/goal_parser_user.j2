@@ -1,9 +1,13 @@
 ### USER REQUEST
+<user_request>
 "{{ raw_goal }}"
+</user_request>
 
 {% if context %}
 ### RELEVANT CONTEXT
+<context>
 {{ context | tojson(indent=2) }}
+</context>
 {% endif %}
 
 {% if few_shot_examples %}

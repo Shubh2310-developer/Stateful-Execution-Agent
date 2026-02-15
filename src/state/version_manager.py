@@ -1,5 +1,5 @@
 from typing import List, Optional, Dict, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from src.state.state_schema import TaskStateSchema
 from src.state.persistence.database_adapter import DatabaseAdapter
 from src.utils.logger import logger
@@ -56,7 +56,7 @@ class VersionManager:
         Note: DatabaseAdapter setup_indexes creates a TTL index for auto-pruning non-milestones.
         This provides explicit control for all version types.
         """
-        cutoff_date = datetime.utcnow() - timedelta(days=days_old)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_old)
         logger.info(f"Pruning versions older than {cutoff_date}")
 
         # Prune versions older than cutoff, preserving milestones if needed

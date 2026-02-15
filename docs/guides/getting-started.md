@@ -47,25 +47,42 @@ This guide will help you set up and run the Stateful Execution Agent on your loc
     cp .env.example .env
     ```
 
-## Initializing the Database
+## Initializing and Running the System
 
-Ensure MongoDB and PostgreSQL are running, then run the setup scripts:
-
-```bash
-PYTHONPATH=. python scripts/setup/init_database.py
-PYTHONPATH=. python scripts/setup/create_indexes.py
-PYTHONPATH=. python scripts/setup/seed_data.py
-```
-
-## Running the API Server
-
-Start the FastAPI application using Uvicorn:
+The easiest way to initialize the database and start the system is to use the master verification script. This script handles:
+1. Infrastructure checks (MongoDB, Redis)
+2. Backend integrity verification
+3. Database seeding
+4. Starting the Backend API
+5. Starting the Frontend UI
 
 ```bash
-python -m uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --reload
+chmod +x scripts/master_verify_and_start.sh
+./scripts/master_verify_and_start.sh
 ```
 
-The API will be available at `http://localhost:8000`. You can access the interactive documentation at `http://localhost:8000/docs`.
+The system will be available at:
+- Frontend: `http://localhost:3000`
+- Backend API docs: `http://localhost:8000/api/v1/docs`
+
+## Manual Initialization (Advanced)
+
+If you prefer to run steps manually:
+
+1. **Initialize Database**:
+   ```bash
+   PYTHONPATH=. python scripts/setup/seed_data.py
+   ```
+
+2. **Start Backend**:
+   ```bash
+   uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --reload
+   ```
+
+3. **Start Frontend**:
+   ```bash
+   npm run dev
+   ```
 
 ## Running Your First Task
 

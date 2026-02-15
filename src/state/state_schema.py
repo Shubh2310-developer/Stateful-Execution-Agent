@@ -14,6 +14,7 @@ class TaskStateSchema(BaseModel):
     current_step_id: Optional[str] = None
     artifacts: List[Artifact] = Field(default_factory=list)
     decisions: List[Decision] = Field(default_factory=list)
+    logs: List[Dict[str, Any]] = Field(default_factory=list)  # Execution logs
     metadata: Dict[str, Any] = Field(default_factory=dict)
     checksum: Optional[str] = None  # SHA-256 of the state content
     updated_at: datetime = Field(default_factory=datetime.utcnow)

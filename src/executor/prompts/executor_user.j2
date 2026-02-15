@@ -1,23 +1,36 @@
 ### STEP EXECUTION CONTEXT
-**CURRENT STEP**:
+<current_step>
 {{ step_definition | tojson(indent=2) }}
+</current_step>
 
-**AVAILABLE ARTIFACTS (Inputs from previous steps)**:
+<available_artifacts>
 {{ available_artifacts | tojson(indent=2) }}
+</available_artifacts>
 
-**TOOLS AVAILABLE IN REGISTRY**:
+<tools_available>
 {% for tool in tool_list %}
 - {{ tool }}
 {% endfor %}
+</tools_available>
+
+<critical_tool_parameters>
+IMPORTANT: Use these EXACT parameter formats:
+- document_generator: {"title": "string", "sections": [{"heading": "string", "content": "string"}]}
+- file_writer: {"filename": "string", "content": "string"}
+- calculator: {"expression": "string"}
+- web_search: {"query": "string"}
+</critical_tool_parameters>
 
 {% if user_preferences %}
-**USER PREFERENCES**:
+<user_preferences>
 {{ user_preferences | tojson(indent=2) }}
+</user_preferences>
 {% endif %}
 
 {% if context %}
-**TASK CONTEXT & RECENT HISTORY**:
+<task_context_and_history>
 {{ context | tojson(indent=2) }}
+</task_context_and_history>
 {% endif %}
 
 ---

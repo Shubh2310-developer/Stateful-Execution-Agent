@@ -9,7 +9,12 @@ class DocumentGeneratorTool(BaseTool):
     def metadata(self) -> ToolMetadata:
         return ToolMetadata(
             name="document_generator",
-            description="Generate structured markdown documents from outlines and content segments.",
+            description=(
+                "Creates well-formatted markdown documents with sections and headings. "
+                "USE THIS TOOL FOR: Writing documentation, creating reports, generating formatted text files. "
+                "DO NOT USE FOR: Searching information, writing code, performing calculations. "
+                "REQUIRES: Pre-defined content for each section."
+            ),
             parameters={
                 "type": "object",
                 "properties": {
@@ -19,13 +24,14 @@ class DocumentGeneratorTool(BaseTool):
                         "items": {
                             "type": "object",
                             "properties": {
-                                "heading": {"type": "string"},
-                                "content": {"type": "string"}
-                            }
+                                "heading": {"type": "string", "description": "Section heading"},
+                                "content": {"type": "string", "description": "Section content/body"}
+                            },
+                            "required": ["heading", "content"]
                         },
                         "description": "List of sections with headings and content"
                     },
-                    "tone": {"type": "string", "description": "Tone of the document", "default": "professional"}
+                    "tone": {"type": "string", "description": "Writing tone: professional, casual, technical", "default": "professional"}
                 },
                 "required": ["title", "sections"]
             },

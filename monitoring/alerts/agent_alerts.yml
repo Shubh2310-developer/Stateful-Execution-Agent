@@ -1,0 +1,96 @@
+# Alerting rules for Stateful Execution Agent
+
+groups:
+  - name: agent_performance
+    rules:
+      - alert: HighTaskFailureRate
+        expr: (rate(tasks_failed_total[5m]) / rate(tasks_created_total[5m])) * 100 > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: stateful-agent
+        annotations:
+          summary: "High task failure rate detected"
+          description: "Task failure rate is {{ $value }}% over the last 5 minutes"
+          
+      - alert: LLMTokenLimitApproaching
+        expr: llm_daily_tokens_used / llm_daily_token_limit * 100 > 80
+        for: 1m
+        labels:
+          severity: warning
+          service: stateful-agent
+        annotations:
+          summary: "LLM daily token limit approaching"
+          description: "Daily token usage is at {{ $value }}% of limit"
+          
+      - alert: APIResponseTimeHigh
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 10
+        for: 3m
+        labels:
+          severity: critical
+          service: stateful-agent
+        annotations:
+          summary: "API response times are high"
+          description: "95th percentile response time is {{ $value }}s"
+          
+      - alert: PlannerFailureRate
+        expr: (rate(planning_failures_total[5m]) / rate(planning_attempts_total[5m])) * 100 > 5
+        for: 2m
+        labels:
+          severity: warning
+          service: stateful-agent
+        annotations:
+          summary: "High planner failure rate"
+          description: "Planning failure rate is {{ $value }}% over the last 5 minutes"
+          
+      - alert: ToolExecutionFailures
+        expr: rate(tool_execution_failures_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+          service: stateful-agent
+        annotations:
+          summary: "Tool execution failures detected"
+          description: "Tool failures occurring at {{ $value }} per second"
+          
+      - alert: DatabaseConnectionLost
+        expr: up{job="mongodb-exporter"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: stateful-agent
+        annotations:
+          summary: "MongoDB connection lost"
+          description: "Cannot connect to MongoDB database"
+          
+      - alert: CacheConnectionLost
+        expr: up{job="redis-exporter"} == 0
+        for: 30s
+        labels:
+          severity: warning
+          service: stateful-agent
+        annotations:
+          summary: "Redis cache connection lost"
+          description: "Cannot connect to Redis cache"
+
+  - name: agent_cost_management
+    rules:
+      - alert: DailyCostExceeded
+        expr: sum(llm_cost_dollars_total) > 20
+        for: 1m
+        labels:
+          severity: warning
+          service: stateful-agent
+        annotations:
+          summary: "Daily LLM cost limit exceeded"
+          description: "Daily LLM costs have reached ${{ $value }}"
+          
+      - alert: UnexpectedTokenSpike
+        expr: rate(llm_tokens_consumed_total[5m]) > 1000
+        for: 2m
+        labels:
+          severity: warning
+          service: stateful-agent
+        annotations:
+          summary: "Unexpected token consumption spike"
+          description: "Token consumption rate is {{ $value }} tokens per second"

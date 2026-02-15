@@ -281,4 +281,4 @@ gpustat==1.1.1
 # - Consider using smaller transformer models
 # - Enable gradient checkpointing for memory efficiency
 #
-# ============================================================================
+# ============================================================================distro>=1.8.0

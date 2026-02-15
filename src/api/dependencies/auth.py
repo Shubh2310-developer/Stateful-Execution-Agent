@@ -10,16 +10,13 @@ async def get_current_user(auth: HTTPAuthorizationCredentials = Security(securit
     In a real implementation, this would decode a JWT or check a session store.
     """
     token = auth.credentials
-    # Simulated validation
-    if token == "demo-token-123":
-        return {"id": "usr_demo_123", "role": "admin"}
 
-    # For dev purposes, allow any token if in debug mode (optional safety check)
-    if settings.DEBUG:
-        return {"id": "usr_dev_user", "role": "developer"}
+    # For dev purposes, allow any token if in debug mode
+    if getattr(settings.app, "debug", False):
+        return {"id": "usr_api_key_user", "role": "developer"}
 
     raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid authentication credentials",
+        detail="Bearer token authentication is not fully implemented. Use API Key.",
         headers={"WWW-Authenticate": "Bearer"},
     )

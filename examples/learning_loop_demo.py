@@ -1,6 +1,6 @@
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Dict, Any
 from unittest.mock import AsyncMock, patch
 
@@ -43,7 +43,7 @@ async def demo_learning_loop():
         artifacts=[
             Artifact(id="art_1", task_id="task_demo_789", type="document", uri="ai_news_summary.md")
         ],
-        updated_at=datetime.utcnow()
+        updated_at=datetime.now(timezone.utc)
     )
 
     feedback = {"content": "Great summary, but I prefer more technical details in the future.", "rating": 4}

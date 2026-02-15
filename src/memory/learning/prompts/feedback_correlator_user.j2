@@ -1,0 +1,24 @@
+Given user feedback and execution logs, identify which steps and decisions the feedback likely relates to.
+
+<user_feedback>
+"{{ text_feedback }}"
+</user_feedback>
+
+<execution_steps>
+{{ trace_summary | tojson(indent=2) }}
+</execution_steps>
+
+<decisions_made>
+{{ decision_summary | tojson(indent=2) }}
+</decisions_made>
+
+### INSTRUCTIONS
+For each step and decision, assign a relevance score (0.0 to 1.0) indicating how much the feedback relates to it.
+
+Return ONLY valid JSON in this format:
+{
+    "steps": {"step_id": 0.8, "another_step": 0.5},
+    "decisions": {"decision_id": 0.9}
+}
+
+If no clear correlation exists, return empty objects.

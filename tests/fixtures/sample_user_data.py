@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from src.core.types import UserMemory
 
 SAMPLE_USER_MEMORY = UserMemory(
@@ -23,5 +23,5 @@ SAMPLE_USER_MEMORY = UserMemory(
             "success_score": 0.95
         }
     ],
-    last_updated=datetime.utcnow()
+    last_updated=datetime.now(timezone.utc)
 )
